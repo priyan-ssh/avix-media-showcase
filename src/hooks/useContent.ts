@@ -14,7 +14,7 @@ const fallbacks = {
 
 export type PageKey = keyof typeof fallbacks;
 
-export function useContent<K extends PageKey>(page: K) {
+export function useContent<K extends PageKey>(page: K): (typeof fallbacks)[K] {
   const query = useQuery({
     queryKey: ["site_content", page],
     queryFn: async () => {
@@ -29,7 +29,7 @@ export function useContent<K extends PageKey>(page: K) {
     initialData: fallbacks[page] as (typeof fallbacks)[K],
     staleTime: 30_000,
   });
-  return query.data;
+  return (query.data ?? fallbacks[page]) as (typeof fallbacks)[K];
 }
 
 export type DbClip = {
@@ -54,7 +54,7 @@ const clipsFallback: DbClip[] = (homeJson.clips.items ?? []).map((c, i) => ({
   position: i + 1,
 }));
 
-export function useClips() {
+export function useClips(): DbClip[] {
   const query = useQuery({
     queryKey: ["clips"],
     queryFn: async () => {
@@ -68,5 +68,5 @@ export function useClips() {
     initialData: clipsFallback,
     staleTime: 30_000,
   });
-  return query.data;
+  return (query.data ?? clipsFallback) as DbClip[];
 }
