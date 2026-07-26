@@ -3,7 +3,8 @@ import useEmblaCarousel from "embla-carousel-react";
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 import { ArrowRight, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { Container } from "./primitives";
+import { Container, Eyebrow } from "./primitives";
+import { CtaLink } from "./Cta";
 import { MediaPlaceholder } from "./MediaPlaceholder";
 import { cn } from "@/lib/utils";
 
@@ -23,9 +24,15 @@ const accentClass: Record<Clip["accentColor"], string> = {
 };
 
 const ringClass: Record<Clip["accentColor"], string> = {
-  red: "shadow-[0_0_40px_-5px_rgba(222,27,36,0.65)] hover:shadow-[0_0_60px_0px_rgba(222,27,36,0.85)] border-0",
-  yellow: "shadow-[0_0_40px_-5px_rgba(234,179,8,0.55)] hover:shadow-[0_0_60px_0px_rgba(234,179,8,0.85)] border-0",
-  green: "shadow-[0_0_40px_-5px_rgba(34,197,94,0.55)] hover:shadow-[0_0_60px_0px_rgba(34,197,94,0.85)] border-0",
+  red: "shadow-[0_0_40px_-5px_rgba(222,27,36,0.55)] hover:shadow-[0_0_60px_0px_rgba(222,27,36,0.85)] border-0",
+  yellow: "shadow-[0_0_40px_-5px_rgba(234,179,8,0.45)] hover:shadow-[0_0_60px_0px_rgba(234,179,8,0.85)] border-0",
+  green: "shadow-[0_0_40px_-5px_rgba(34,197,94,0.45)] hover:shadow-[0_0_60px_0px_rgba(34,197,94,0.85)] border-0",
+};
+
+const fadeBorderClass: Record<Clip["accentColor"], string> = {
+  red: "bg-[linear-gradient(to_bottom,#ef4444_0%,transparent_70%)] group-hover:bg-[linear-gradient(to_bottom,#ef4444_0%,transparent_90%)]",
+  yellow: "bg-[linear-gradient(to_bottom,#eab308_0%,transparent_70%)] group-hover:bg-[linear-gradient(to_bottom,#eab308_0%,transparent_90%)]",
+  green: "bg-[linear-gradient(to_bottom,#22c55e_0%,transparent_70%)] group-hover:bg-[linear-gradient(to_bottom,#22c55e_0%,transparent_90%)]",
 };
 
 export function ClipsCarousel({
@@ -59,56 +66,61 @@ export function ClipsCarousel({
 
   return (
     <section className="relative border-b border-border bg-background overflow-hidden">
-      {/* Huge ambient glowing colored spots in background like Site 2.png */}
-      <div className="absolute top-1/2 left-1/4 -z-10 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-primary/15 blur-[150px] pointer-events-none" />
-      <div className="absolute top-1/2 right-1/4 -z-10 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-yellow-500/10 blur-[150px] pointer-events-none" />
+      {/* Background glow like in Site 2.png */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 h-[600px] w-[900px] rounded-full bg-primary/10 blur-[160px] pointer-events-none" />
 
-      <Container className="py-16 md:py-20">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="h-px w-8 bg-primary" />
-            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
+      <Container className="py-20 md:py-28">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6">
+          <div>
+            <Eyebrow>PORTFOLIO</Eyebrow>
+            <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl md:text-5xl tracking-tight text-white">
               {eyebrow}
-            </span>
+            </h2>
           </div>
-          <Link
-            to={viewAll.to}
-            className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:text-white"
-          >
-            {viewAll.label} <ArrowRight className="h-4 w-4" />
-          </Link>
+          <CtaLink to={viewAll.to} variant="outline" size="sm">
+            {viewAll.label} <ArrowRight className="h-3.5 w-3.5 text-primary" />
+          </CtaLink>
         </div>
 
         <div className="relative mt-8">
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex gap-6">
               {displayItems.map((clip, i) => (
-                <div key={i} className="min-w-0 shrink-0 basis-[80%] sm:basis-[45%] md:basis-[32%]">
+                <div key={i} className="min-w-0 shrink-0 basis-[80%] sm:basis-[45%] md:basis-[32%] py-2 px-1">
                   <div
                     className={cn(
-                      "group relative overflow-hidden rounded-2xl border-0 bg-zinc-950 transition-all duration-300 hover:scale-[1.02]",
+                      "group relative rounded-[18px] transition-all duration-300 hover:scale-[1.02]",
                       ringClass[clip.accentColor],
                     )}
                   >
-                    <MediaPlaceholder
-                      src={clip.image}
-                      alt={clip.title}
-                      aspect="9/16"
-                      className="rounded-none border-0"
+                    {/* Fading Gradient Border backdrop layer (simulates ::before with inset -2px) */}
+                    <div
+                      className={cn(
+                        "absolute -inset-[2px] rounded-[20px] pointer-events-none transition-opacity duration-300 -z-10",
+                        fadeBorderClass[clip.accentColor],
+                      )}
                     />
 
-                    {/* Top dark gradient overlay for crisp podcast/brand text */}
-                    <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-none" />
-                    {/* Bottom deep dark gradient overlay for title and views like in Site 2.png */}
-                    <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-black via-black/85 to-transparent pointer-events-none" />
+                    {/* Inner Card content container with border-radius and black background */}
+                    <div className="relative w-full overflow-hidden rounded-[18px] bg-black">
+                      <MediaPlaceholder
+                        src={clip.image}
+                        alt={clip.title}
+                        aspect="9/16"
+                        className="rounded-none border-0"
+                      />
 
-                    {/* Card Content Container */}
-                    <div className="absolute inset-0 flex flex-col justify-between p-6 z-10 pointer-events-none">
-                      <div className="text-center sm:text-left">
-                        <span className="text-[11px] font-black uppercase tracking-widest text-white/95 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                          {clip.brand}
-                        </span>
-                      </div>
+                      {/* Top dark gradient overlay for crisp podcast/brand text */}
+                      <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-none" />
+                      {/* Bottom deep dark gradient overlay for title and views like in Site 2.png */}
+                      <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-black via-black/85 to-transparent pointer-events-none" />
+
+                      <div className="absolute inset-0 flex flex-col justify-between p-6 z-10 pointer-events-none">
+                        <div className="text-center sm:text-left">
+                          <span className="text-[11px] font-black uppercase tracking-widest text-white/95 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                            {clip.brand}
+                          </span>
+                        </div>
 
                       <div className="flex flex-col gap-3 text-center sm:text-left">
                         <div>
@@ -140,6 +152,7 @@ export function ClipsCarousel({
                           <span>{clip.views}</span>
                         </div>
                       </div>
+                    </div>
                     </div>
                   </div>
                 </div>

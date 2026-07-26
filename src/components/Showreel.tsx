@@ -44,12 +44,12 @@ export function Showreel({
           {/* Cyan ambient spotlight behind showreel */}
           <div className="absolute -inset-10 bg-gradient-to-l from-sky-500/35 via-blue-600/25 to-transparent blur-[140px] opacity-85 pointer-events-none -z-10" />
 
-          {/* Frameless showreel player radially merging into background */}
+          {/* Edgeless showreel player: 4-way overlays dissolve every rectangular line */}
           <div 
             className="relative w-full overflow-hidden bg-transparent"
             style={{
-              maskImage: "radial-gradient(ellipse at center, black 55%, transparent 98%)",
-              WebkitMaskImage: "radial-gradient(ellipse at center, black 55%, transparent 98%)"
+              maskImage: "radial-gradient(ellipse at center, black 40%, transparent 96%)",
+              WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 96%)"
             }}
           >
             <MediaPlaceholder
@@ -59,8 +59,11 @@ export function Showreel({
               priority={true}
               className="w-full h-full object-cover rounded-none border-0"
             />
-            {/* Cinematic vignette overlay merging into black background */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(5,5,5,0.85)_100%)] pointer-events-none" />
+            {/* 4-WAY EDGE FADING: Dissolves every rectangular line into background & gradient! */}
+            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background via-background/70 to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/85 to-transparent pointer-events-none" />
+            <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background via-background/80 to-transparent pointer-events-none" />
+            <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background via-background/80 to-transparent pointer-events-none" />
           </div>
         </div>
       </Container>

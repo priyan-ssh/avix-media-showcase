@@ -51,7 +51,7 @@ export function MediaPlaceholder({
     }
 
     return (
-      <div className={cn("relative overflow-hidden rounded-lg bg-zinc-950", className)} style={{ aspectRatio: aspect }}>
+      <div className={cn("relative overflow-hidden bg-transparent", className)} style={{ aspectRatio: aspect }}>
         {isLoading && (
           <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-850 to-zinc-950 animate-pulse flex items-center justify-center z-10 pointer-events-none">
             <div className="h-6 w-6 rounded-full border-2 border-primary/40 border-t-primary animate-spin" />
