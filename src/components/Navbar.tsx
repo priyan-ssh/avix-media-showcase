@@ -1,11 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import site from "@/content/site.json";
+import { useContent } from "@/hooks/useContent";
 import { Logo } from "./Logo";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
+  const site = useContent("site");
   const [open, setOpen] = useState(false);
 
   return (
