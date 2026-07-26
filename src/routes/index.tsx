@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import home from "@/content/home.json";
 import { Hero } from "@/components/Hero";
 import { StatsBar } from "@/components/StatsBar";
 import { PartnerLogos } from "@/components/PartnerLogos";
 import { Showreel } from "@/components/Showreel";
 import { ClipsCarousel } from "@/components/ClipsCarousel";
 import { BottomCTA } from "@/components/BottomCTA";
+import { useContent, useClips } from "@/hooks/useContent";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,6 +28,8 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
+  const home = useContent("home");
+  const clips = useClips();
   return (
     <>
       <Hero data={home.hero} />
@@ -37,7 +39,14 @@ function HomePage() {
       <ClipsCarousel
         eyebrow={home.clips.eyebrow}
         viewAll={home.clips.viewAll}
-        items={home.clips.items as never}
+        items={clips.map((c) => ({
+          brand: c.brand,
+          title: c.title,
+          titleAccent: c.title_accent,
+          accentColor: (c.accent_color as "red" | "yellow" | "green") ?? "red",
+          views: c.views,
+          image: c.image,
+        }))}
       />
       <BottomCTA data={home.bottomCta} />
     </>

@@ -1,9 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import about from "@/content/about.json";
-import home from "@/content/home.json";
 import { AboutHero } from "@/components/AboutHero";
 import { FeatureGrid } from "@/components/FeatureGrid";
 import { BottomCTA } from "@/components/BottomCTA";
+import { useContent } from "@/hooks/useContent";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -26,6 +25,8 @@ export const Route = createFileRoute("/about")({
 });
 
 function AboutPage() {
+  const about = useContent("about");
+  const home = useContent("home");
   return (
     <>
       <AboutHero data={about.hero} />

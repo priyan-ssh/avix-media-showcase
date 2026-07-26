@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import home from "@/content/home.json";
 import { Container } from "@/components/primitives";
 import { MediaPlaceholder } from "@/components/MediaPlaceholder";
 import { Play } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useClips } from "@/hooks/useContent";
 
 const accentClass: Record<string, string> = {
   red: "text-primary",
@@ -39,7 +39,7 @@ export const Route = createFileRoute("/clips")({
 });
 
 function ClipsPage() {
-  const clips = home.clips.items;
+  const clips = useClips();
   return (
     <section className="border-b border-border bg-background">
       <Container className="py-16 md:py-24">
@@ -57,45 +57,48 @@ function ClipsPage() {
         </p>
 
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {clips.map((clip, i) => (
-            <div key={i}>
-              <div
-                className={cn(
-                  "group relative overflow-hidden rounded-2xl border bg-card",
-                  ringClass[clip.accentColor],
-                )}
-              >
-                <MediaPlaceholder
-                  src={clip.image}
-                  alt={clip.title}
-                  aspect="9/16"
-                  className="rounded-none border-0"
-                />
-                <div className="absolute inset-0 flex flex-col justify-between p-5">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/90">
-                    {clip.brand}
-                  </span>
-                  <div>
-                    <div className="text-2xl font-black uppercase leading-tight text-white">
-                      {clip.title}
-                    </div>
-                    <div
-                      className={cn(
-                        "text-2xl font-black uppercase leading-tight",
-                        accentClass[clip.accentColor],
-                      )}
-                    >
-                      {clip.titleAccent}
+          {clips.map((clip) => {
+            const ac = (clip.accent_color as string) ?? "red";
+            return (
+              <div key={clip.id}>
+                <div
+                  className={cn(
+                    "group relative overflow-hidden rounded-2xl border bg-card",
+                    ringClass[ac] ?? ringClass.red,
+                  )}
+                >
+                  <MediaPlaceholder
+                    src={clip.image}
+                    alt={clip.title}
+                    aspect="9/16"
+                    className="rounded-none border-0"
+                  />
+                  <div className="absolute inset-0 flex flex-col justify-between p-5">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/90">
+                      {clip.brand}
+                    </span>
+                    <div>
+                      <div className="text-2xl font-black uppercase leading-tight text-white">
+                        {clip.title}
+                      </div>
+                      <div
+                        className={cn(
+                          "text-2xl font-black uppercase leading-tight",
+                          accentClass[ac] ?? accentClass.red,
+                        )}
+                      >
+                        {clip.title_accent}
+                      </div>
                     </div>
                   </div>
                 </div>
+                <div className="mt-3 flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
+                  <Play className="h-3 w-3 fill-primary text-primary" />
+                  {clip.views}
+                </div>
               </div>
-              <div className="mt-3 flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
-                <Play className="h-3 w-3 fill-primary text-primary" />
-                {clip.views}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </Container>
     </section>

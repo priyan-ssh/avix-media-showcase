@@ -1,5 +1,5 @@
 import { Instagram, Youtube, Linkedin } from "lucide-react";
-import site from "@/content/site.json";
+import { useContent } from "@/hooks/useContent";
 import { Logo } from "./Logo";
 
 const iconMap = {
@@ -9,6 +9,7 @@ const iconMap = {
 };
 
 export function Footer() {
+  const site = useContent("site");
   return (
     <footer className="border-t border-border bg-background">
       <div className="mx-auto grid max-w-[1200px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 py-6 md:grid-cols-3">
