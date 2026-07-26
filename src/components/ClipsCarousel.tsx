@@ -90,15 +90,15 @@ export function ClipsCarousel({
               {eyebrow}
             </span>
           </div>
-          <a
-            href={viewAll.to}
+          <Link
+            to={viewAll.to}
             className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:text-white"
           >
             {viewAll.label} <ArrowRight className="h-4 w-4" />
-          </a>
+          </Link>
         </div>
 
-        <div className="relative mt-8">
+        <div className="relative mt-8" ref={wheelRef}>
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex gap-6">
               {items.map((clip, i) => (
