@@ -1,0 +1,19 @@
+{
+  "eyebrow": "GET IN TOUCH",
+  "titleParts": [
+    { "text": "Let's create something " },
+    { "text": "amazing.", "accent": true }
+  ],
+  "subtext": "Have a project in mind? Let's bring your ideas to life. Send a message and I'll get back to you soon.",
+  "details": [
+    { "icon": "mail", "label": "aviixmedia@gmail.com", "href": "mailto:aviixmedia@gmail.com" },
+    { "icon": "instagram", "label": "@aviixmedia", "href": "https://instagram.com/aviixmedia" },
+    { "icon": "map-pin", "label": "India • Worldwide", "href": "" }
+  ],
+  "form": {
+    "namePlaceholder": "Your Name",
+    "emailPlaceholder": "Email Address",
+    "messagePlaceholder": "Your Message",
+    "submitLabel": "SEND MESSAGE"
+  }
+}
