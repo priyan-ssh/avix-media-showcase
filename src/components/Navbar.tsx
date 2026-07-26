@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import site from "@/content/site.json";
 import { Logo } from "./Logo";
-import { CtaLink } from "./Cta";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
@@ -37,12 +36,6 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden md:block">
-          <CtaLink to={site.cta.to} size="md">
-            {site.cta.label} <span aria-hidden>→</span>
-          </CtaLink>
-        </div>
-
         <button
           type="button"
           className="md:hidden text-white"
@@ -67,9 +60,6 @@ export function Navbar() {
                 {item.label}
               </Link>
             ))}
-            <CtaLink to={site.cta.to} className="mt-2 w-full">
-              {site.cta.label} <span aria-hidden>→</span>
-            </CtaLink>
           </div>
         </div>
       )}
