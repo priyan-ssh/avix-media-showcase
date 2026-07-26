@@ -1,0 +1,84 @@
+{
+  "hero": {
+    "eyebrow": "VIDEO EDITING & CONTENT CREATION",
+    "titleParts": [
+      { "text": "EDITING VIDEOS THAT PEOPLE ACTUALLY " },
+      { "text": "WATCH.", "accent": true }
+    ],
+    "subtext": "Helping creators and brands turn long-form content into engaging videos that generate views and grow audiences.",
+    "primaryCta": { "label": "VIEW MY WORK", "to": "/#showreel" },
+    "secondaryCta": { "label": "BOOK A CALL", "to": "/contact" },
+    "image": ""
+  },
+  "stats": [
+    { "value": "400M+", "label": "VIEWS GENERATED" },
+    { "value": "3+", "label": "YEARS EXPERIENCE" },
+    { "value": "100+", "label": "PROJECTS DELIVERED" },
+    { "value": "WORLDWIDE", "label": "CLIENTS" }
+  ],
+  "partners": {
+    "label": "I'VE WORKED WITH",
+    "logos": [
+      "DOPE AS USUAL",
+      "SIDE+",
+      "YOU SHOULD KNOW PODCAST",
+      "LEADER STUDIOS",
+      "STIFF SOCKS",
+      "TECH N9NE"
+    ]
+  },
+  "showreel": {
+    "eyebrow": "SHOWREEL 2024",
+    "title": "A QUICK LOOK AT MY STYLE.",
+    "subtext": "Edits. Storytelling. Impact.",
+    "cta": { "label": "WATCH SHOWREEL", "href": "#" },
+    "image": ""
+  },
+  "clips": {
+    "eyebrow": "FEATURED SHORT CLIPS",
+    "viewAll": { "label": "VIEW ALL CLIPS", "to": "#" },
+    "items": [
+      {
+        "brand": "DOPE AS USUAL PODCAST",
+        "title": "YOU CAN'T",
+        "titleAccent": "MAKE THIS UP",
+        "accentColor": "red",
+        "views": "1.2M+ VIEWS",
+        "image": ""
+      },
+      {
+        "brand": "YOU SHOULD KNOW PODCAST",
+        "title": "THE HUMAN BODY",
+        "titleAccent": "IS INSANE",
+        "accentColor": "yellow",
+        "views": "890K+ VIEWS",
+        "image": ""
+      },
+      {
+        "brand": "STIFF SOCKS PODCAST",
+        "title": "THAT'S JUST",
+        "titleAccent": "HOW IT IS",
+        "accentColor": "green",
+        "views": "715K+ VIEWS",
+        "image": ""
+      },
+      {
+        "brand": "LEADER STUDIOS",
+        "title": "BUILD SOMETHING",
+        "titleAccent": "THEY REMEMBER",
+        "accentColor": "red",
+        "views": "540K+ VIEWS",
+        "image": ""
+      }
+    ]
+  },
+  "bottomCta": {
+    "eyebrow": "LET'S CREATE SOMETHING",
+    "titleParts": [
+      { "text": "READY TO CREATE YOUR NEXT " },
+      { "text": "VIRAL VIDEO?", "accent": true }
+    ],
+    "subtext": "Let's bring your ideas to life.",
+    "cta": { "label": "LET'S WORK TOGETHER", "to": "/contact" }
+  }
+}
