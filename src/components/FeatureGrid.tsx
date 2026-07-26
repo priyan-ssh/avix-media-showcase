@@ -24,9 +24,7 @@ export function FeatureGrid({
               </span>
               <div className="min-w-0">
                 <h3 className="text-base font-bold text-white">{f.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {f.description}
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">{f.description}</p>
               </div>
             </div>
           );

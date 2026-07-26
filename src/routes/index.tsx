@@ -19,8 +19,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Aviix Media — Video Editing That Gets Watched" },
       {
         property: "og:description",
-        content:
-          "Long-form content turned into engaging short videos. 400M+ views generated.",
+        content: "Long-form content turned into engaging short videos. 400M+ views generated.",
       },
     ],
   }),

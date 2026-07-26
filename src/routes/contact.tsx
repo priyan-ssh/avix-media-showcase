@@ -14,8 +14,7 @@ export const Route = createFileRoute("/contact")({
       { property: "og:title", content: "Contact — Aviix Media" },
       {
         property: "og:description",
-        content:
-          "Send Aviix Media a message about your next video project. India • Worldwide.",
+        content: "Send Aviix Media a message about your next video project. India • Worldwide.",
       },
     ],
   }),

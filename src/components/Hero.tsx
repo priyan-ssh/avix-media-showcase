@@ -12,10 +12,7 @@ export function Hero({ data }: { data: Hero }) {
       <Container className="grid grid-cols-1 gap-10 py-16 md:grid-cols-12 md:gap-8 md:py-24">
         <div className="md:col-span-6 flex flex-col justify-center">
           <Eyebrow>{data.eyebrow}</Eyebrow>
-          <AccentTitle
-            parts={data.titleParts}
-            className="mt-6 text-5xl md:text-6xl lg:text-7xl"
-          />
+          <AccentTitle parts={data.titleParts} className="mt-6 text-5xl md:text-6xl lg:text-7xl" />
           <p className="mt-6 max-w-md text-sm md:text-base text-muted-foreground leading-relaxed">
             {data.subtext}
           </p>

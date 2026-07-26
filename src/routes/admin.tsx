@@ -1,16 +1,43 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { supabase } from "@/integrations/supabase/client";
 import { Container } from "@/components/primitives";
 import { cn } from "@/lib/utils";
-import { LogOut, Loader2, Trash2, Plus, Save, Eye, EyeOff } from "lucide-react";
+import {
+  LogOut,
+  Loader2,
+  Trash2,
+  Plus,
+  Save,
+  Eye,
+  EyeOff,
+  GripVertical,
+  Upload,
+  ImageIcon,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
-    meta: [
-      { title: "Admin — Aviix Media" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+    meta: [{ title: "Admin — Aviix Media" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: AdminPage,
   ssr: false,
@@ -22,6 +49,7 @@ function AdminPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -30,8 +58,17 @@ function AdminPage() {
       setSession(data.session);
       setLoading(false);
     });
+
+    supabase
+      .from("user_roles")
+      .select("id", { count: "exact", head: true })
+      .eq("role", "admin")
+      .then(({ count }) => {
+        setHasAdmin((count ?? 0) > 0);
+      });
+
     return () => sub.data.subscription.unsubscribe();
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     if (!session) {
@@ -49,26 +86,27 @@ function AdminPage() {
     })();
   }, [session, refreshKey]);
 
-  if (loading) {
+  if (loading)
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
-  }
 
-  if (!session) return <AuthPanel />;
-
-  if (!isAdmin) {
-    return <ClaimAdminPanel onClaimed={() => setRefreshKey((k) => k + 1)} email={session.user.email ?? ""} />;
-  }
-
+  if (!session) return <AuthPanel hasAdmin={hasAdmin} />;
+  if (!isAdmin)
+    return (
+      <ClaimAdminPanel
+        onClaimed={() => setRefreshKey((k) => k + 1)}
+        email={session.user.email ?? ""}
+      />
+    );
   return <Dashboard email={session.user.email ?? ""} />;
 }
 
-/* ------------------------- Auth ------------------------- */
+/* ─── Auth ─────────────────────────────────────────────── */
 
-function AuthPanel() {
+function AuthPanel({ hasAdmin }: { hasAdmin: boolean | null }) {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -80,7 +118,7 @@ function AuthPanel() {
     e.preventDefault();
     setBusy(true);
     setMsg(null);
-    if (mode === "signup") {
+    if (mode === "signup" && !hasAdmin) {
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -96,9 +134,9 @@ function AuthPanel() {
 
   return (
     <Container className="flex min-h-[80vh] items-center justify-center py-16">
-      <div className="w-full max-w-sm rounded-lg border border-border bg-card p-8">
+      <div className="w-full max-w-sm rounded-xl border border-border bg-card p-8 shadow-2xl">
         <h1 className="text-xl font-bold uppercase tracking-widest text-white">
-          Admin {mode === "signup" ? "Sign up" : "Sign in"}
+          Admin {mode === "signup" && !hasAdmin ? "Sign up" : "Sign in"}
         </h1>
         <p className="mt-2 text-xs text-muted-foreground">
           Restricted area. Aviix Media staff only.
@@ -138,18 +176,22 @@ function AuthPanel() {
             className="mt-2 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-3 text-xs font-semibold uppercase tracking-widest text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
           >
             {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-            {mode === "signup" ? "Create account" : "Sign in"}
+            {mode === "signup" && !hasAdmin ? "Create account" : "Sign in"}
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              setMode(mode === "signup" ? "signin" : "signup");
-              setMsg(null);
-            }}
-            className="text-xs text-muted-foreground hover:text-white"
-          >
-            {mode === "signup" ? "Have an account? Sign in" : "Need to create the admin account? Sign up"}
-          </button>
+          {!hasAdmin && (
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === "signup" ? "signin" : "signup");
+                setMsg(null);
+              }}
+              className="text-xs text-muted-foreground hover:text-white"
+            >
+              {mode === "signup"
+                ? "Have an account? Sign in"
+                : "Need to create the admin account? Sign up"}
+            </button>
+          )}
         </form>
       </div>
     </Container>
@@ -164,24 +206,18 @@ function ClaimAdminPanel({ onClaimed, email }: { onClaimed: () => void; email: s
     setBusy(true);
     const { data, error } = await supabase.rpc("claim_admin");
     setBusy(false);
-    if (error) {
-      setMsg(error.message);
-    } else if (data === false) {
-      setMsg("An admin already exists. This account has no admin access.");
-    } else {
-      onClaimed();
-    }
+    if (error) setMsg(error.message);
+    else if (data === false) setMsg("An admin already exists. This account has no admin access.");
+    else onClaimed();
   };
 
   return (
     <Container className="flex min-h-[70vh] items-center justify-center py-16">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-8">
-        <h1 className="text-xl font-bold uppercase tracking-widest text-white">
-          Not an admin
-        </h1>
+      <div className="w-full max-w-md rounded-xl border border-border bg-card p-8">
+        <h1 className="text-xl font-bold uppercase tracking-widest text-white">Not an admin</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Signed in as <span className="text-white">{email}</span>. If this is the
-          first setup, you can claim the admin role now (only works if no admin exists).
+          Signed in as <span className="text-white">{email}</span>. If this is the first setup, you
+          can claim the admin role now.
         </p>
         {msg && <p className="mt-4 text-xs text-primary">{msg}</p>}
         <div className="mt-6 flex gap-3">
@@ -190,12 +226,11 @@ function ClaimAdminPanel({ onClaimed, email }: { onClaimed: () => void; email: s
             disabled={busy}
             className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-3 text-xs font-semibold uppercase tracking-widest text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
           >
-            {busy && <Loader2 className="h-4 w-4 animate-spin" />}
-            Claim admin
+            {busy && <Loader2 className="h-4 w-4 animate-spin" />} Claim admin
           </button>
           <button
             onClick={() => supabase.auth.signOut()}
-            className="inline-flex items-center justify-center gap-2 rounded-md border border-border px-4 py-3 text-xs font-semibold uppercase tracking-widest text-white hover:bg-background"
+            className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-3 text-xs font-semibold uppercase tracking-widest text-white hover:bg-background"
           >
             <LogOut className="h-4 w-4" /> Sign out
           </button>
@@ -205,7 +240,7 @@ function ClaimAdminPanel({ onClaimed, email }: { onClaimed: () => void; email: s
   );
 }
 
-/* ------------------------- Dashboard ------------------------- */
+/* ─── Dashboard Shell ───────────────────────────────────── */
 
 type Tab = "overview" | "home" | "about" | "contact" | "site" | "clips" | "messages";
 
@@ -217,7 +252,7 @@ function Dashboard({ email }: { email: string }) {
     { id: "home", label: "Home" },
     { id: "about", label: "About" },
     { id: "contact", label: "Contact" },
-    { id: "site", label: "Site (nav/footer)" },
+    { id: "site", label: "Site" },
     { id: "clips", label: "Clips" },
     { id: "messages", label: "Messages" },
   ];
@@ -269,6 +304,8 @@ function Dashboard({ email }: { email: string }) {
   );
 }
 
+/* ─── Overview ─────────────────────────────────────────── */
+
 function OverviewTab() {
   const [stats, setStats] = useState<{
     clips: number;
@@ -306,9 +343,9 @@ function OverviewTab() {
   const cards = [
     { label: "Clips", value: stats?.clips ?? "—" },
     { label: "Messages", value: stats?.messages ?? "—" },
-    { label: "Unread messages", value: stats?.unread ?? "—" },
+    { label: "Unread", value: stats?.unread ?? "—" },
     {
-      label: "Last content edit",
+      label: "Last edit",
       value: stats?.lastEdit ? new Date(stats.lastEdit).toLocaleString() : "—",
     },
   ];
@@ -317,9 +354,7 @@ function OverviewTab() {
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((c) => (
         <div key={c.label} className="rounded-lg border border-border bg-card p-5">
-          <div className="text-xs uppercase tracking-widest text-muted-foreground">
-            {c.label}
-          </div>
+          <div className="text-xs uppercase tracking-widest text-muted-foreground">{c.label}</div>
           <div className="mt-2 text-2xl font-black text-white">{c.value}</div>
         </div>
       ))}
@@ -327,76 +362,290 @@ function OverviewTab() {
   );
 }
 
+/* ─── Generic Field Components ──────────────────────────── */
+
+function FieldInput({
+  label,
+  value,
+  onChange,
+  type = "text",
+  textarea = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  textarea?: boolean;
+}) {
+  const cls =
+    "w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-white placeholder:text-muted-foreground focus:border-primary focus:outline-none";
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </label>
+      {textarea ? (
+        <textarea
+          rows={3}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={cn(cls, "resize-y")}
+        />
+      ) : (
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={cls}
+        />
+      )}
+    </div>
+  );
+}
+
+function FieldSection({
+  title,
+  children,
+  defaultOpen = true,
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="rounded-lg border border-border bg-card">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between px-4 py-3 text-left"
+      >
+        <span className="text-xs font-bold uppercase tracking-widest text-white">{title}</span>
+        {open ? (
+          <ChevronUp className="h-4 w-4 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        )}
+      </button>
+      {open && (
+        <div className="border-t border-border px-4 pb-4 pt-3 flex flex-col gap-3">{children}</div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Content Editor (Visual Form) ─────────────────────── */
+
 function ContentEditor({ page }: { page: "home" | "about" | "contact" | "site" }) {
-  const [text, setText] = useState<string>("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data: row } = await supabase
       .from("site_content")
       .select("data")
       .eq("page", page)
       .maybeSingle();
-    setText(JSON.stringify(data?.data ?? {}, null, 2));
+    // Use imported fallback JSON if no DB row exists
+    const fallbackMod = await import(`@/content/${page}.json`);
+    setData(row?.data ?? fallbackMod.default);
     setLoading(false);
-  };
+  }, [page]);
 
   useEffect(() => {
     load();
-  }, [page]);
+  }, [load]);
 
   const save = async () => {
     setBusy(true);
-    setMsg(null);
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(text);
-    } catch {
-      setMsg("Invalid JSON. Please fix syntax before saving.");
-      setBusy(false);
-      return;
-    }
-    const { error } = await supabase
-      .from("site_content")
-      .upsert({ page, data: parsed as never }, { onConflict: "page" });
+    await supabase.from("site_content").upsert({ page, data }, { onConflict: "page" });
     setBusy(false);
-    setMsg(error ? error.message : "Saved.");
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
+  if (loading) return <Loader2 className="h-5 w-5 animate-spin text-primary" />;
+
   return (
-    <div>
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-white">
-          Editing: {page}
-        </h2>
-        <div className="flex items-center gap-2">
-          {msg && <span className="text-xs text-muted-foreground">{msg}</span>}
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      {/* ── Left: Form ── */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-bold uppercase tracking-widest text-white">Edit: {page}</h2>
           <button
             onClick={save}
-            disabled={busy || loading}
-            className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-xs font-semibold uppercase tracking-widest text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+            disabled={busy}
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-widest text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
           >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save
+            {busy ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : saved ? (
+              <Check className="h-3 w-3" />
+            ) : (
+              <Save className="h-3 w-3" />
+            )}
+            {saved ? "Saved!" : "Save"}
           </button>
         </div>
+        <DynamicForm data={data} onChange={setData} />
       </div>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        spellCheck={false}
-        className="h-[60vh] w-full rounded-md border border-border bg-card p-4 font-mono text-xs text-white focus:border-primary focus:outline-none"
-      />
-      <p className="mt-2 text-xs text-muted-foreground">
-        Edit the JSON directly. Changes save to the database and appear on the site
-        immediately on next page load.
-      </p>
+
+      {/* ── Right: Live Preview ── */}
+      <div className="hidden xl:block">
+        <div className="sticky top-4">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Live Preview
+          </p>
+          <div className="max-h-[80vh] overflow-y-auto rounded-xl border border-border bg-zinc-950 p-4 text-xs">
+            <pre className="whitespace-pre-wrap break-all font-mono text-[10px] text-muted-foreground">
+              {JSON.stringify(data, null, 2)}
+            </pre>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
+
+/* ─── Dynamic Form Renderer ─────────────────────────────── */
+// Recursively renders fields for any JSON shape
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function DynamicForm({
+  data,
+  onChange,
+  depth = 0,
+}: {
+  data: any;
+  onChange: (v: any) => void;
+  depth?: number;
+}) {
+  if (data === null || data === undefined) return null;
+
+  if (typeof data === "string") {
+    return (
+      <textarea
+        rows={2}
+        value={data}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-white focus:border-primary focus:outline-none resize-y"
+      />
+    );
+  }
+  if (typeof data === "number" || typeof data === "boolean") {
+    return (
+      <input
+        type={typeof data === "number" ? "number" : "text"}
+        value={String(data)}
+        onChange={(e) =>
+          onChange(typeof data === "number" ? Number(e.target.value) : e.target.value === "true")
+        }
+        className="rounded-md border border-border bg-background px-3 py-2 text-sm text-white focus:border-primary focus:outline-none"
+      />
+    );
+  }
+  if (Array.isArray(data)) {
+    return (
+      <div className="flex flex-col gap-2">
+        {data.map((item, i) => (
+          <div
+            key={i}
+            className={cn(
+              "rounded-lg border border-border/60 bg-zinc-900/60 p-3",
+              depth > 0 && "bg-zinc-950/60",
+            )}
+          >
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
+                Item {i + 1}
+              </span>
+              <button
+                type="button"
+                onClick={() => onChange(data.filter((_: unknown, idx: number) => idx !== i))}
+                className="text-muted-foreground hover:text-primary"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+            <DynamicForm
+              depth={depth + 1}
+              data={item}
+              onChange={(v) => onChange(data.map((x: unknown, idx: number) => (idx === i ? v : x)))}
+            />
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => {
+            const sample = data[0];
+            const blank: any =
+              typeof sample === "string"
+                ? ""
+                : typeof sample === "object" && sample !== null
+                  ? Object.fromEntries(
+                      Object.keys(sample).map((k) => [
+                        k,
+                        typeof sample[k] === "string"
+                          ? ""
+                          : typeof sample[k] === "number"
+                            ? 0
+                            : typeof sample[k] === "boolean"
+                              ? false
+                              : [],
+                      ]),
+                    )
+                  : "";
+            onChange([...data, blank]);
+          }}
+          className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-primary hover:text-primary/80"
+        >
+          <Plus className="h-3 w-3" /> Add item
+        </button>
+      </div>
+    );
+  }
+  if (typeof data === "object") {
+    return (
+      <div className="flex flex-col gap-3">
+        {Object.keys(data).map((key) => (
+          <div key={key}>
+            {typeof data[key] === "object" && data[key] !== null ? (
+              <FieldSection title={key} defaultOpen={depth === 0}>
+                <DynamicForm
+                  depth={depth + 1}
+                  data={data[key]}
+                  onChange={(v) => onChange({ ...data, [key]: v })}
+                />
+              </FieldSection>
+            ) : (
+              <FieldInput
+                label={key}
+                value={String(data[key] ?? "")}
+                onChange={(v) =>
+                  onChange({ ...data, [key]: typeof data[key] === "number" ? Number(v) : v })
+                }
+                textarea={
+                  key === "subtext" ||
+                  key === "description" ||
+                  key === "message" ||
+                  String(data[key]).length > 80
+                }
+              />
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return null;
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
+/* ─── Clips Manager (DnD + Upload) ─────────────────────── */
 
 type Clip = {
   id: string;
@@ -412,20 +661,36 @@ type Clip = {
 function ClipsManager() {
   const [clips, setClips] = useState<Clip[]>([]);
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-  const load = async () => {
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase.from("clips").select("*").order("position", { ascending: true });
+    const { data } = await supabase
+      .from("clips")
+      .select("*")
+      .order("position", { ascending: true });
     setClips((data as Clip[]) ?? []);
     setLoading(false);
-  };
-  useEffect(() => {
-    load();
   }, []);
 
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setClips((prev) => {
+      const oldIndex = prev.findIndex((c) => c.id === active.id);
+      const newIndex = prev.findIndex((c) => c.id === over.id);
+      return arrayMove(prev, oldIndex, newIndex);
+    });
+  };
+
   const addClip = async () => {
-    setBusy("new");
     const nextPos = (clips[clips.length - 1]?.position ?? 0) + 1;
     await supabase.from("clips").insert({
       brand: "NEW BRAND",
@@ -436,25 +701,34 @@ function ClipsManager() {
       image: "",
       position: nextPos,
     });
-    setBusy(null);
     load();
   };
 
-  const saveClip = async (c: Clip) => {
-    setBusy(c.id);
-    await supabase
-      .from("clips")
-      .update({
-        brand: c.brand,
-        title: c.title,
-        title_accent: c.title_accent,
-        accent_color: c.accent_color,
-        views: c.views,
-        image: c.image,
-        position: c.position,
-      })
-      .eq("id", c.id);
-    setBusy(null);
+  const updateClip = (id: string, patch: Partial<Clip>) => {
+    setClips((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+  };
+
+  const saveAll = async () => {
+    setSaving(true);
+    // Re-assign positions based on current order
+    const updates = clips.map((c, i) =>
+      supabase
+        .from("clips")
+        .update({
+          brand: c.brand,
+          title: c.title,
+          title_accent: c.title_accent,
+          accent_color: c.accent_color,
+          views: c.views,
+          image: c.image,
+          position: i + 1,
+        })
+        .eq("id", c.id),
+    );
+    await Promise.all(updates);
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
     load();
   };
 
@@ -468,97 +742,225 @@ function ClipsManager() {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-white">Clips</h2>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <h2 className="flex-1 text-sm font-bold uppercase tracking-widest text-white">Clips</h2>
+        <p className="text-[10px] text-muted-foreground">
+          Drag rows to reorder. Click Save All to persist.
+        </p>
         <button
           onClick={addClip}
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-xs font-semibold uppercase tracking-widest text-primary-foreground hover:bg-primary/90"
+          className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-card"
         >
           <Plus className="h-4 w-4" /> Add clip
         </button>
+        <button
+          onClick={saveAll}
+          disabled={saving}
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-xs font-semibold uppercase tracking-widest text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+        >
+          {saving ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : saved ? (
+            <Check className="h-3 w-3" />
+          ) : (
+            <Save className="h-3 w-3" />
+          )}
+          {saved ? "Saved!" : "Save All"}
+        </button>
       </div>
-      <div className="space-y-3">
-        {clips.map((c, i) => (
-          <ClipRow
-            key={c.id}
-            clip={c}
-            onChange={(next) =>
-              setClips((prev) => prev.map((x, idx) => (idx === i ? next : x)))
-            }
-            onSave={() => saveClip(clips[i])}
-            onDelete={() => deleteClip(c.id)}
-            busy={busy === c.id}
-          />
-        ))}
-        {clips.length === 0 && (
-          <p className="text-sm text-muted-foreground">No clips yet. Add one to get started.</p>
-        )}
-      </div>
+
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={clips.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+          <div className="flex flex-col gap-3">
+            {clips.map((clip) => (
+              <SortableClipRow
+                key={clip.id}
+                clip={clip}
+                onChange={(patch) => updateClip(clip.id, patch)}
+                onDelete={() => deleteClip(clip.id)}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+
+      {clips.length === 0 && (
+        <p className="text-sm text-muted-foreground">No clips yet. Add one to get started.</p>
+      )}
     </div>
   );
 }
 
-function ClipRow({
+function SortableClipRow({
   clip,
   onChange,
-  onSave,
   onDelete,
-  busy,
 }: {
   clip: Clip;
-  onChange: (c: Clip) => void;
-  onSave: () => void;
+  onChange: (p: Partial<Clip>) => void;
   onDelete: () => void;
-  busy: boolean;
 }) {
-  const field = (k: keyof Clip, type: "text" | "number" = "text") => (
-    <input
-      type={type}
-      value={String(clip[k] ?? "")}
-      onChange={(e) =>
-        onChange({
-          ...clip,
-          [k]: type === "number" ? Number(e.target.value) : e.target.value,
-        })
-      }
-      className="rounded-md border border-border bg-background px-2 py-2 text-xs text-white focus:border-primary focus:outline-none"
-    />
-  );
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: clip.id,
+  });
+  const style = { transform: CSS.Transform.toString(transform), transition };
+
   return (
-    <div className="grid grid-cols-1 gap-2 rounded-md border border-border bg-card p-3 md:grid-cols-[80px_1fr_1fr_1fr_120px_120px_1fr_auto]">
-      {field("position", "number")}
-      {field("brand")}
-      {field("title")}
-      {field("title_accent")}
-      <select
-        value={clip.accent_color}
-        onChange={(e) => onChange({ ...clip, accent_color: e.target.value })}
-        className="rounded-md border border-border bg-background px-2 py-2 text-xs text-white focus:border-primary focus:outline-none"
-      >
-        <option value="red">red</option>
-        <option value="yellow">yellow</option>
-        <option value="green">green</option>
-      </select>
-      {field("views")}
-      {field("image")}
-      <div className="flex items-center gap-1">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "rounded-lg border border-border bg-card p-4 transition",
+        isDragging && "z-50 opacity-75 shadow-2xl ring-1 ring-primary",
+      )}
+    >
+      <div className="flex items-start gap-3">
+        {/* Drag handle */}
         <button
-          onClick={onSave}
-          disabled={busy}
-          className="inline-flex items-center gap-1 rounded-md bg-primary px-2 py-2 text-[10px] font-bold uppercase tracking-widest text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="mt-1 cursor-grab touch-none text-muted-foreground hover:text-white active:cursor-grabbing"
         >
-          {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+          <GripVertical className="h-5 w-5" />
         </button>
-        <button
-          onClick={onDelete}
-          className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-2 text-white hover:border-primary hover:text-primary"
-        >
-          <Trash2 className="h-3 w-3" />
+
+        <div className="flex-1 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <FieldInput label="Brand" value={clip.brand} onChange={(v) => onChange({ brand: v })} />
+          <FieldInput label="Title" value={clip.title} onChange={(v) => onChange({ title: v })} />
+          <FieldInput
+            label="Title Accent"
+            value={clip.title_accent}
+            onChange={(v) => onChange({ title_accent: v })}
+          />
+          <FieldInput label="Views" value={clip.views} onChange={(v) => onChange({ views: v })} />
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Accent Color
+            </label>
+            <select
+              value={clip.accent_color}
+              onChange={(e) => onChange({ accent_color: e.target.value })}
+              className="rounded-md border border-border bg-background px-3 py-2 text-sm text-white focus:border-primary focus:outline-none"
+            >
+              <option value="red">Red</option>
+              <option value="yellow">Yellow</option>
+              <option value="green">Green</option>
+            </select>
+          </div>
+          <ImageUploadField
+            clipId={clip.id}
+            currentUrl={clip.image}
+            onUploaded={(url) => onChange({ image: url })}
+          />
+        </div>
+
+        <button onClick={onDelete} className="mt-1 text-muted-foreground hover:text-primary">
+          <Trash2 className="h-4 w-4" />
         </button>
       </div>
+
+      {/* Thumbnail preview */}
+      {clip.image && (
+        <div className="mt-3 ml-8">
+          <img
+            src={clip.image}
+            alt={clip.title}
+            className="h-20 w-12 rounded object-cover border border-border"
+          />
+        </div>
+      )}
     </div>
   );
 }
+
+/* ─── Image Upload Field ─────────────────────────────────── */
+
+function ImageUploadField({
+  clipId,
+  currentUrl,
+  onUploaded,
+}: {
+  clipId: string;
+  currentUrl: string;
+  onUploaded: (url: string) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const upload = async (file: File) => {
+    setUploading(true);
+    setError(null);
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const filename = `clip_${clipId}_${crypto.randomUUID()}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from("media")
+      .upload(filename, file, { upsert: false });
+    if (upErr) {
+      setError(upErr.message);
+      setUploading(false);
+      return;
+    }
+    const { data } = supabase.storage.from("media").getPublicUrl(filename);
+    onUploaded(data.publicUrl);
+    setUploading(false);
+  };
+
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        Image
+      </label>
+      <div className="flex items-center gap-2">
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) upload(f);
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-white hover:bg-background disabled:opacity-60"
+        >
+          {uploading ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <Upload className="h-3 w-3" />
+          )}
+          {uploading ? "Uploading…" : "Upload"}
+        </button>
+        {currentUrl && (
+          <a
+            href={currentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-white"
+          >
+            <ImageIcon className="h-3 w-3" /> View
+          </a>
+        )}
+        {/* Also allow pasting a URL directly */}
+        <input
+          type="url"
+          value={currentUrl}
+          placeholder="…or paste URL"
+          onChange={(e) => onUploaded(e.target.value)}
+          className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-2 text-[11px] text-white placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+        />
+      </div>
+      {error && <p className="text-[10px] text-red-400">{error}</p>}
+    </div>
+  );
+}
+
+/* ─── Messages Tab ──────────────────────────────────────── */
 
 type Message = {
   id: string;
@@ -591,7 +993,6 @@ function MessagesTab() {
     () => (filter === "unread" ? items.filter((m) => !m.read) : items),
     [items, filter],
   );
-
   const toggle = async (m: Message) => {
     await supabase.from("contact_messages").update({ read: !m.read }).eq("id", m.id);
     load();
@@ -606,9 +1007,9 @@ function MessagesTab() {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-sm font-bold uppercase tracking-widest text-white">
-          Contact messages ({items.length})
+          Messages ({items.length})
         </h2>
         <div className="flex gap-2">
           {(["all", "unread"] as const).map((f) => (
@@ -632,7 +1033,7 @@ function MessagesTab() {
           <div
             key={m.id}
             className={cn(
-              "rounded-md border bg-card p-4",
+              "rounded-lg border bg-card p-4",
               m.read ? "border-border" : "border-primary/60",
             )}
           >
@@ -654,20 +1055,16 @@ function MessagesTab() {
                 </button>
                 <button
                   onClick={() => remove(m.id)}
-                  className="rounded-md border border-border px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-white hover:border-primary hover:text-primary"
+                  className="rounded-md border border-border px-2 py-1 text-white hover:border-primary hover:text-primary"
                 >
                   <Trash2 className="h-3 w-3" />
                 </button>
               </div>
             </div>
-            <p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">
-              {m.message}
-            </p>
+            <p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">{m.message}</p>
           </div>
         ))}
-        {filtered.length === 0 && (
-          <p className="text-sm text-muted-foreground">No messages.</p>
-        )}
+        {filtered.length === 0 && <p className="text-sm text-muted-foreground">No messages.</p>}
       </div>
     </div>
   );

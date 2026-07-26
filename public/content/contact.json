@@ -1,9 +1,6 @@
 {
   "eyebrow": "GET IN TOUCH",
-  "titleParts": [
-    { "text": "Let's create something " },
-    { "text": "amazing.", "accent": true }
-  ],
+  "titleParts": [{ "text": "Let's create something " }, { "text": "amazing.", "accent": true }],
   "subtext": "Have a project in mind? Let's bring your ideas to life. Send a message and I'll get back to you soon.",
   "details": [
     { "icon": "mail", "label": "aviixmedia@gmail.com", "href": "mailto:aviixmedia@gmail.com" },

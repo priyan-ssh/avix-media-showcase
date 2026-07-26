@@ -19,10 +19,7 @@ export function AboutHero({
       <Container className="grid grid-cols-1 gap-10 py-16 md:grid-cols-12 md:py-24">
         <div className="md:col-span-6 flex flex-col justify-center">
           <Eyebrow>{data.eyebrow}</Eyebrow>
-          <AccentTitle
-            parts={data.titleParts}
-            className="mt-6 text-4xl md:text-5xl lg:text-6xl"
-          />
+          <AccentTitle parts={data.titleParts} className="mt-6 text-4xl md:text-5xl lg:text-6xl" />
           <div className="mt-6 space-y-4 max-w-md text-sm text-muted-foreground leading-relaxed">
             {data.paragraphs.map((p, i) => (
               <p key={i}>{p}</p>

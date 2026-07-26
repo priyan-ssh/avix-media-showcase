@@ -23,9 +23,7 @@ export function BottomCTA({
           parts={data.titleParts}
           className="mx-auto mt-6 max-w-3xl text-4xl md:text-5xl lg:text-6xl"
         />
-        <p className="mx-auto mt-5 max-w-md text-sm text-muted-foreground">
-          {data.subtext}
-        </p>
+        <p className="mx-auto mt-5 max-w-md text-sm text-muted-foreground">{data.subtext}</p>
         <div className="mt-8 flex justify-center">
           <CtaLink to={data.cta.to} size="lg">
             {data.cta.label} <ArrowRight className="h-4 w-4" />

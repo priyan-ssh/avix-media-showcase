@@ -41,13 +41,8 @@ export function ContactSplit({
       <Container className="grid grid-cols-1 gap-12 py-16 md:grid-cols-2 md:gap-16 md:py-24">
         <div>
           <Eyebrow>{data.eyebrow}</Eyebrow>
-          <AccentTitle
-            parts={data.titleParts}
-            className="mt-6 text-4xl md:text-5xl lg:text-6xl"
-          />
-          <p className="mt-5 max-w-md text-sm text-muted-foreground">
-            {data.subtext}
-          </p>
+          <AccentTitle parts={data.titleParts} className="mt-6 text-4xl md:text-5xl lg:text-6xl" />
+          <p className="mt-5 max-w-md text-sm text-muted-foreground">{data.subtext}</p>
           <ul className="mt-10 space-y-4">
             {data.details.map((d) => {
               const Icon = iconMap[d.icon] ?? Mail;
@@ -90,9 +85,7 @@ export function ContactSplit({
             }
             setStatus("sending");
             setErrorMsg(null);
-            const { error } = await supabase
-              .from("contact_messages")
-              .insert(parsed.data);
+            const { error } = await supabase.from("contact_messages").insert(parsed.data);
             if (error) {
               setStatus("error");
               setErrorMsg("Could not send. Please try again.");
@@ -124,9 +117,7 @@ export function ContactSplit({
             placeholder={data.form.messagePlaceholder}
             className="w-full rounded-md border border-border bg-card px-4 py-4 text-sm text-white placeholder:text-muted-foreground focus:border-primary focus:outline-none resize-none"
           />
-          {errorMsg && (
-            <p className="text-xs text-primary">{errorMsg}</p>
-          )}
+          {errorMsg && <p className="text-xs text-primary">{errorMsg}</p>}
           <CtaButton type="submit" size="lg" className="w-full" disabled={status === "sending"}>
             {status === "sent"
               ? "MESSAGE SENT"

@@ -46,9 +46,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-white">
-          This page didn't load
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight text-white">This page didn't load</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong. Try refreshing or head back home.
         </p>
@@ -89,8 +87,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Aviix Media — Video Editing & Content Creation" },
       {
         property: "og:description",
-        content:
-          "Long-form content turned into engaging videos that people actually watch.",
+        content: "Long-form content turned into engaging videos that people actually watch.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -117,6 +114,29 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en" className="dark">
       <head>
         <HeadContent />
+        {/* GitHub Pages SPA redirect receiver — restores the path pushed by 404.html */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+          (function() {
+            var redirect = sessionStorage.redirect;
+            delete sessionStorage.redirect;
+            if (redirect && redirect !== location.href) {
+              history.replaceState(null, null, redirect);
+            }
+            // Handle the ?/ query-string redirect from 404.html
+            var search = window.location.search;
+            if (search.slice(1,2) === '/') {
+              var decoded = search.slice(1).replace(/~and~/g, '&');
+              window.history.replaceState(null, null,
+                window.location.pathname.slice(0, -1) + decoded +
+                (window.location.hash ? window.location.hash : '')
+              );
+            }
+          })();
+        `,
+          }}
+        />
       </head>
       <body className="bg-background text-foreground">
         {children}

@@ -19,12 +19,12 @@
   "partners": {
     "label": "I'VE WORKED WITH",
     "logos": [
-      "DOPE AS USUAL",
-      "SIDE+",
-      "YOU SHOULD KNOW PODCAST",
-      "LEADER STUDIOS",
-      "STIFF SOCKS",
-      "TECH N9NE"
+      { "name": "DOPE AS USUAL", "url": "https://youtube.com" },
+      { "name": "SIDE+", "url": "https://sideplus.com" },
+      { "name": "YOU SHOULD KNOW PODCAST", "url": "https://youtube.com" },
+      { "name": "LEADER STUDIOS", "url": "https://leaderstudios.co" },
+      { "name": "STIFF SOCKS", "url": "https://youtube.com" },
+      { "name": "TECH N9NE", "url": "https://strangemusicinc.com" }
     ]
   },
   "showreel": {

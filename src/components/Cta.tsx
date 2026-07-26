@@ -15,10 +15,8 @@ const sizes: Record<Size, string> = {
 
 const variants: Record<Variant, string> = {
   red: "bg-primary text-primary-foreground hover:bg-primary/90",
-  outline:
-    "border border-white/80 text-white hover:bg-white hover:text-background",
-  "ghost-red":
-    "border border-primary text-white hover:bg-primary hover:text-primary-foreground",
+  outline: "border border-white/80 text-white hover:bg-white hover:text-background",
+  "ghost-red": "border border-primary text-white hover:bg-primary hover:text-primary-foreground",
 };
 
 type CommonProps = {
@@ -60,11 +58,7 @@ export function CtaButton({
   ...rest
 }: CommonProps & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button
-      type={type}
-      className={cn(base, sizes[size], variants[variant], className)}
-      {...rest}
-    >
+    <button type={type} className={cn(base, sizes[size], variants[variant], className)} {...rest}>
       {children}
     </button>
   );

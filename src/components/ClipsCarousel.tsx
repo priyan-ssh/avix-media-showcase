@@ -38,11 +38,10 @@ export function ClipsCarousel({
 }) {
   const [emblaRef, embla] = useEmblaCarousel({
     align: "start",
-    loop: false,
-    dragFree: true,
+    loop: true,
     slidesToScroll: 1,
   });
-  const [canPrev, setCanPrev] = useState(false);
+  const [canPrev, setCanPrev] = useState(true);
   const [canNext, setCanNext] = useState(true);
   const wheelRef = useRef<HTMLDivElement | null>(null);
 
@@ -63,18 +62,25 @@ export function ClipsCarousel({
     if (!embla) return;
     const node = wheelRef.current;
     if (!node) return;
+
+    let lastScrollTime = 0;
     const onWheel = (e: WheelEvent) => {
       const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      if (delta === 0) return;
+      if (Math.abs(delta) < 15) return;
+
+      const now = Date.now();
+      if (now - lastScrollTime < 300) {
+        e.preventDefault();
+        return;
+      }
+
       e.preventDefault();
-      const engine = embla.internalEngine();
-      const loc = engine.location.get();
-      engine.location.set(loc - delta);
-      engine.target.set(loc - delta);
-      engine.scrollLooper.loop(-1);
-      engine.slideLooper.loop();
-      engine.translate.to(loc - delta);
-      engine.animation.start();
+      if (delta > 0) {
+        embla.scrollNext();
+      } else {
+        embla.scrollPrev();
+      }
+      lastScrollTime = now;
     };
     node.addEventListener("wheel", onWheel, { passive: false });
     return () => node.removeEventListener("wheel", onWheel);
@@ -102,10 +108,7 @@ export function ClipsCarousel({
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex gap-6">
               {items.map((clip, i) => (
-                <div
-                  key={i}
-                  className="min-w-0 shrink-0 basis-[80%] sm:basis-[45%] md:basis-[32%]"
-                >
+                <div key={i} className="min-w-0 shrink-0 basis-[80%] sm:basis-[45%] md:basis-[32%]">
                   <div
                     className={cn(
                       "group relative overflow-hidden rounded-2xl border bg-card",
