@@ -69,12 +69,12 @@ export function Showreel({
               priority={true}
               className="w-full h-full object-cover rounded-none border-0"
             />
-            {/* REDUCED INNER BLACK VIGNETTE + NARROWER 4-WAY EDGE FADING: Keeps image clear and bright while blending boundaries! */}
+            {/* CUSTOM INNER BLACK: More on top, reduced on right! */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(10,10,10,0.75)_80%,#0a0a0a_98%)] pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/75 to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/90 to-transparent pointer-events-none" />
             <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/85 to-transparent pointer-events-none" />
             <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent pointer-events-none" />
-            <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent pointer-events-none" />
+            <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent pointer-events-none" />
           </div>
         </div>
       </Container>
