@@ -36,7 +36,7 @@
   },
   "clips": {
     "eyebrow": "FEATURED SHORT CLIPS",
-    "viewAll": { "label": "VIEW ALL CLIPS", "to": "#" },
+    "viewAll": { "label": "VIEW ALL CLIPS", "to": "/clips" },
     "items": [
       {
         "brand": "DOPE AS USUAL PODCAST",
