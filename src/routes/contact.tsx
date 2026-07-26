@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import contact from "@/content/contact.json";
 import { ContactSplit } from "@/components/ContactSplit";
+import { useContent } from "@/hooks/useContent";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -23,5 +23,6 @@ export const Route = createFileRoute("/contact")({
 });
 
 function ContactPage() {
+  const contact = useContent("contact");
   return <ContactSplit data={contact} />;
 }
