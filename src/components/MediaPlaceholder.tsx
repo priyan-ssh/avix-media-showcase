@@ -14,6 +14,21 @@ export function MediaPlaceholder({
   label?: string;
 }) {
   if (src) {
+    const isVideo = /\.(mp4|webm|mov|m4v|ogg|qt|mkv|avi)(\?|#|$)/i.test(src);
+    if (isVideo) {
+      return (
+        <video
+          src={src}
+          className={cn("w-full h-full object-cover rounded-lg bg-black", className)}
+          style={{ aspectRatio: aspect }}
+          controls
+          playsInline
+          muted
+          loop
+          autoPlay
+        />
+      );
+    }
     return (
       <img
         src={src}

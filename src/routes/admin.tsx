@@ -252,7 +252,7 @@ function Dashboard({ email }: { email: string }) {
     { id: "home", label: "Home" },
     { id: "about", label: "About" },
     { id: "contact", label: "Contact" },
-    { id: "site", label: "Site" },
+    { id: "site", label: "Header & Footer" },
     { id: "clips", label: "Clips" },
     { id: "messages", label: "Messages" },
   ];
@@ -475,7 +475,9 @@ function ContentEditor({ page }: { page: "home" | "about" | "contact" | "site" }
       {/* ── Left: Form ── */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-white">Edit: {page}</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-white">
+            Edit: {page === "site" ? "Header & Footer (Site)" : page}
+          </h2>
           <button
             onClick={save}
             disabled={busy}
@@ -621,6 +623,19 @@ function DynamicForm({
                   onChange={(v) => onChange({ ...data, [key]: v })}
                 />
               </FieldSection>
+            ) : key === "image" ||
+              key === "video" ||
+              key === "logo" ||
+              key === "src" ||
+              key.toLowerCase().includes("image") ||
+              key.toLowerCase().includes("video") ||
+              key.toLowerCase().includes("logo") ? (
+              <MediaUploadField
+                clipId={`cms_${key}_${depth}`}
+                label={key}
+                currentUrl={String(data[key] ?? "")}
+                onUploaded={(url) => onChange({ ...data, [key]: url })}
+              />
             ) : (
               <FieldInput
                 label={key}
@@ -848,8 +863,9 @@ function SortableClipRow({
               <option value="green">Green</option>
             </select>
           </div>
-          <ImageUploadField
+          <MediaUploadField
             clipId={clip.id}
+            label="Clip Video / Image"
             currentUrl={clip.image}
             onUploaded={(url) => onChange({ image: url })}
           />
@@ -859,29 +875,20 @@ function SortableClipRow({
           <Trash2 className="h-4 w-4" />
         </button>
       </div>
-
-      {/* Thumbnail preview */}
-      {clip.image && (
-        <div className="mt-3 ml-8">
-          <img
-            src={clip.image}
-            alt={clip.title}
-            className="h-20 w-12 rounded object-cover border border-border"
-          />
-        </div>
-      )}
     </div>
   );
 }
 
-/* ─── Image Upload Field ─────────────────────────────────── */
+/* ─── Media / Video / Image Upload Field ───────────────────── */
 
-function ImageUploadField({
+function MediaUploadField({
   clipId,
+  label = "Image / Video",
   currentUrl,
   onUploaded,
 }: {
   clipId: string;
+  label?: string;
   currentUrl: string;
   onUploaded: (url: string) => void;
 }) {
@@ -892,8 +899,8 @@ function ImageUploadField({
   const upload = async (file: File) => {
     setUploading(true);
     setError(null);
-    const ext = file.name.split(".").pop() ?? "jpg";
-    const filename = `clip_${clipId}_${crypto.randomUUID()}.${ext}`;
+    const ext = file.name.split(".").pop() ?? "bin";
+    const filename = `media_${clipId}_${crypto.randomUUID()}.${ext}`;
     const { error: upErr } = await supabase.storage
       .from("media")
       .upload(filename, file, { upsert: false });
@@ -907,16 +914,18 @@ function ImageUploadField({
     setUploading(false);
   };
 
+  const isVideo = currentUrl && /\.(mp4|webm|mov|m4v|ogg|qt|mkv|avi)(\?|#|$)/i.test(currentUrl);
+
   return (
     <div className="flex flex-col gap-1">
       <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-        Image
+        {label}
       </label>
       <div className="flex items-center gap-2">
         <input
           ref={inputRef}
           type="file"
-          accept="image/*"
+          accept="image/*,video/*"
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];
@@ -934,7 +943,7 @@ function ImageUploadField({
           ) : (
             <Upload className="h-3 w-3" />
           )}
-          {uploading ? "Uploading…" : "Upload"}
+          {uploading ? "Uploading…" : "Upload Device File"}
         </button>
         {currentUrl && (
           <a
@@ -950,12 +959,29 @@ function ImageUploadField({
         <input
           type="url"
           value={currentUrl}
-          placeholder="…or paste URL"
+          placeholder="…or paste image/video URL"
           onChange={(e) => onUploaded(e.target.value)}
           className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-2 text-[11px] text-white placeholder:text-muted-foreground focus:border-primary focus:outline-none"
         />
       </div>
       {error && <p className="text-[10px] text-red-400">{error}</p>}
+      {currentUrl && isVideo && (
+        <video
+          src={currentUrl}
+          className="mt-2 h-20 w-36 rounded border border-border bg-black object-cover"
+          muted
+          playsInline
+          loop
+          autoPlay
+        />
+      )}
+      {currentUrl && !isVideo && (
+        <img
+          src={currentUrl}
+          alt="Preview"
+          className="mt-2 h-20 w-36 rounded border border-border object-cover"
+        />
+      )}
     </div>
   );
 }

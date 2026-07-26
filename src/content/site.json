@@ -1,5 +1,6 @@
 {
   "brand": "AVIIX MEDIA",
+  "logo": "",
   "nav": [
     { "label": "HOME", "to": "/" },
     { "label": "ABOUT", "to": "/about" },
