@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ClipsRouteImport } from './routes/clips'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClipsRoute = ClipsRouteImport.update({
+  id: '/clips',
+  path: '/clips',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -32,30 +38,34 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/clips': typeof ClipsRoute
   '/contact': typeof ContactRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/clips': typeof ClipsRoute
   '/contact': typeof ContactRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/clips': typeof ClipsRoute
   '/contact': typeof ContactRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/contact'
+  fullPaths: '/' | '/about' | '/clips' | '/contact'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/contact'
-  id: '__root__' | '/' | '/about' | '/contact'
+  to: '/' | '/about' | '/clips' | '/contact'
+  id: '__root__' | '/' | '/about' | '/clips' | '/contact'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  ClipsRoute: typeof ClipsRoute
   ContactRoute: typeof ContactRoute
 }
 
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clips': {
+      id: '/clips'
+      path: '/clips'
+      fullPath: '/clips'
+      preLoaderRoute: typeof ClipsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  ClipsRoute: ClipsRoute,
   ContactRoute: ContactRoute,
 }
 export const routeTree = rootRouteImport
