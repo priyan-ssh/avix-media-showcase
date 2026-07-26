@@ -1,0 +1,17 @@
+{
+  "brand": "AVIIX MEDIA",
+  "nav": [
+    { "label": "HOME", "to": "/" },
+    { "label": "ABOUT", "to": "/about" },
+    { "label": "CONTACT", "to": "/contact" }
+  ],
+  "cta": { "label": "LET'S WORK TOGETHER", "to": "/contact" },
+  "footer": {
+    "copyright": "© 2026 Aviix Media. All rights reserved.",
+    "socials": [
+      { "icon": "instagram", "href": "https://instagram.com/aviixmedia" },
+      { "icon": "youtube", "href": "https://youtube.com" },
+      { "icon": "linkedin", "href": "https://linkedin.com" }
+    ]
+  }
+}

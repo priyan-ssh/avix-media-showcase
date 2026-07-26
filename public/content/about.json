@@ -1,0 +1,32 @@
+{
+  "hero": {
+    "eyebrow": "ABOUT ME",
+    "titleParts": [
+      { "text": "I turn long-form content into high-impact " },
+      { "text": "videos.", "accent": true }
+    ],
+    "paragraphs": [
+      "I'm Aviix, a video editor and content creator helping podcasters, brands and creators share their message with the world through powerful storytelling and engaging edits.",
+      "Every edit I make is focused on one thing — keeping the audience watching until the end."
+    ],
+    "cta": { "label": "LET'S WORK TOGETHER", "to": "/contact" },
+    "image": ""
+  },
+  "features": [
+    {
+      "icon": "zap",
+      "title": "Focused On Impact",
+      "description": "Every edit is crafted to grab attention and maintain retention."
+    },
+    {
+      "icon": "star",
+      "title": "Storytelling First",
+      "description": "Pacing, emotion and clarity drive every decision."
+    },
+    {
+      "icon": "globe",
+      "title": "Built For Platforms",
+      "description": "Edits optimized for YouTube, Instagram, TikTok & more."
+    }
+  ]
+}
