@@ -1,0 +1,189 @@
+# Decap CMS configuration for Aviix Media.
+#
+# Before this works you need to:
+#   1. Connect this project to a GitHub repository (Lovable → GitHub).
+#   2. Set the `repo` field below to <owner>/<name> of that repo.
+#   3. Configure a Decap-compatible OAuth provider (e.g. Netlify-hosted
+#      github OAuth, or your own oauth-provider deployment) and point
+#      `base_url` at it. Docs: https://decapcms.org/docs/github-backend/
+#
+# Decap opens at /admin/ and commits edits directly to the repo, which
+# Lovable syncs back into the project.
+
+backend:
+  name: github
+  repo: your-github-user/your-repo   # <-- change me after connecting GitHub
+  branch: main
+  base_url: https://api.netlify.com  # <-- change if self-hosting OAuth
+  auth_endpoint: auth
+
+publish_mode: simple
+media_folder: "public/images"
+public_folder: "/images"
+site_url: /
+
+collections:
+  - name: site
+    label: Site
+    files:
+      - file: "public/content/site.json"
+        label: Global (nav / footer)
+        name: site
+        fields:
+          - { label: Brand, name: brand, widget: string }
+          - label: Nav
+            name: nav
+            widget: list
+            fields:
+              - { label: Label, name: label, widget: string }
+              - { label: To, name: to, widget: string }
+          - label: CTA
+            name: cta
+            widget: object
+            fields:
+              - { label: Label, name: label, widget: string }
+              - { label: To, name: to, widget: string }
+          - label: Footer
+            name: footer
+            widget: object
+            fields:
+              - { label: Copyright, name: copyright, widget: string }
+              - label: Socials
+                name: socials
+                widget: list
+                fields:
+                  - { label: Icon, name: icon, widget: string }
+                  - { label: Href, name: href, widget: string }
+
+  - name: pages
+    label: Pages
+    files:
+      - file: "public/content/home.json"
+        label: Home
+        name: home
+        fields:
+          - { label: Hero, name: hero, widget: object, fields: [
+              { label: Eyebrow, name: eyebrow, widget: string },
+              { label: Subtext, name: subtext, widget: text },
+              { label: Image, name: image, widget: string, required: false },
+              { label: Title parts, name: titleParts, widget: list, fields: [
+                { label: Text, name: text, widget: string },
+                { label: Accent, name: accent, widget: boolean, required: false, default: false },
+              ] },
+              { label: Primary CTA, name: primaryCta, widget: object, fields: [
+                { label: Label, name: label, widget: string },
+                { label: To, name: to, widget: string },
+              ] },
+              { label: Secondary CTA, name: secondaryCta, widget: object, fields: [
+                { label: Label, name: label, widget: string },
+                { label: To, name: to, widget: string },
+              ] },
+            ] }
+          - label: Stats
+            name: stats
+            widget: list
+            fields:
+              - { label: Value, name: value, widget: string }
+              - { label: Label, name: label, widget: string }
+          - label: Partners
+            name: partners
+            widget: object
+            fields:
+              - { label: Label, name: label, widget: string }
+              - { label: Logos, name: logos, widget: list, field: { label: Logo, name: logo, widget: string } }
+          - label: Showreel
+            name: showreel
+            widget: object
+            fields:
+              - { label: Eyebrow, name: eyebrow, widget: string }
+              - { label: Title, name: title, widget: string }
+              - { label: Subtext, name: subtext, widget: text }
+              - { label: Image, name: image, widget: string, required: false }
+              - { label: CTA, name: cta, widget: object, fields: [
+                  { label: Label, name: label, widget: string },
+                  { label: Href, name: href, widget: string },
+                ] }
+          - label: Clips
+            name: clips
+            widget: object
+            fields:
+              - { label: Eyebrow, name: eyebrow, widget: string }
+              - { label: View all, name: viewAll, widget: object, fields: [
+                  { label: Label, name: label, widget: string },
+                  { label: To, name: to, widget: string },
+                ] }
+              - label: Items
+                name: items
+                widget: list
+                fields:
+                  - { label: Brand, name: brand, widget: string }
+                  - { label: Title, name: title, widget: string }
+                  - { label: Title accent, name: titleAccent, widget: string }
+                  - { label: Accent color, name: accentColor, widget: select, options: ["red", "yellow", "green"] }
+                  - { label: Views, name: views, widget: string }
+                  - { label: Image, name: image, widget: string, required: false }
+          - label: Bottom CTA
+            name: bottomCta
+            widget: object
+            fields:
+              - { label: Eyebrow, name: eyebrow, widget: string }
+              - { label: Subtext, name: subtext, widget: text }
+              - { label: Title parts, name: titleParts, widget: list, fields: [
+                  { label: Text, name: text, widget: string },
+                  { label: Accent, name: accent, widget: boolean, required: false, default: false },
+                ] }
+              - { label: CTA, name: cta, widget: object, fields: [
+                  { label: Label, name: label, widget: string },
+                  { label: To, name: to, widget: string },
+                ] }
+
+      - file: "public/content/about.json"
+        label: About
+        name: about
+        fields:
+          - { label: Hero, name: hero, widget: object, fields: [
+              { label: Eyebrow, name: eyebrow, widget: string },
+              { label: Image, name: image, widget: string, required: false },
+              { label: Title parts, name: titleParts, widget: list, fields: [
+                { label: Text, name: text, widget: string },
+                { label: Accent, name: accent, widget: boolean, required: false, default: false },
+              ] },
+              { label: Paragraphs, name: paragraphs, widget: list, field: { label: Paragraph, name: p, widget: text } },
+              { label: CTA, name: cta, widget: object, fields: [
+                { label: Label, name: label, widget: string },
+                { label: To, name: to, widget: string },
+              ] },
+            ] }
+          - label: Features
+            name: features
+            widget: list
+            fields:
+              - { label: Icon, name: icon, widget: string }
+              - { label: Title, name: title, widget: string }
+              - { label: Description, name: description, widget: text }
+
+      - file: "public/content/contact.json"
+        label: Contact
+        name: contact
+        fields:
+          - { label: Eyebrow, name: eyebrow, widget: string }
+          - { label: Subtext, name: subtext, widget: text }
+          - { label: Title parts, name: titleParts, widget: list, fields: [
+              { label: Text, name: text, widget: string },
+              { label: Accent, name: accent, widget: boolean, required: false, default: false },
+            ] }
+          - label: Details
+            name: details
+            widget: list
+            fields:
+              - { label: Icon, name: icon, widget: string }
+              - { label: Label, name: label, widget: string }
+              - { label: Href, name: href, widget: string, required: false }
+          - label: Form
+            name: form
+            widget: object
+            fields:
+              - { label: Name placeholder, name: namePlaceholder, widget: string }
+              - { label: Email placeholder, name: emailPlaceholder, widget: string }
+              - { label: Message placeholder, name: messagePlaceholder, widget: string }
+              - { label: Submit label, name: submitLabel, widget: string }
