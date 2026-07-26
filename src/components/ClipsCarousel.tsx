@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
+import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 import { ArrowRight, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Container } from "./primitives";
@@ -36,54 +37,23 @@ export function ClipsCarousel({
   viewAll: { label: string; to: string };
   items: Clip[];
 }) {
-  const [emblaRef, embla] = useEmblaCarousel({
-    align: "start",
-    loop: true,
-    slidesToScroll: 1,
-  });
-  const [canPrev, setCanPrev] = useState(true);
-  const [canNext, setCanNext] = useState(true);
-  const wheelRef = useRef<HTMLDivElement | null>(null);
+  // WheelGesturesPlugin handles wheel events natively, giving smooth pixel-level
+  // continuous scroll that feeds directly into Embla's physics engine.
+  const [emblaRef, embla] = useEmblaCarousel({ align: "start", loop: true, dragFree: true }, [
+    WheelGesturesPlugin({ forceWheelAxis: "y" }),
+  ]);
 
-  const onSelect = useCallback(() => {
-    if (!embla) return;
-    setCanPrev(embla.canScrollPrev());
-    setCanNext(embla.canScrollNext());
-  }, [embla]);
+  const [, forceUpdate] = useState(0);
 
   useEffect(() => {
     if (!embla) return;
-    onSelect();
+    const onSelect = () => forceUpdate((n) => n + 1);
     embla.on("select", onSelect);
     embla.on("reInit", onSelect);
-  }, [embla, onSelect]);
-
-  useEffect(() => {
-    if (!embla) return;
-    const node = wheelRef.current;
-    if (!node) return;
-
-    let lastScrollTime = 0;
-    const onWheel = (e: WheelEvent) => {
-      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      if (Math.abs(delta) < 15) return;
-
-      const now = Date.now();
-      if (now - lastScrollTime < 300) {
-        e.preventDefault();
-        return;
-      }
-
-      e.preventDefault();
-      if (delta > 0) {
-        embla.scrollNext();
-      } else {
-        embla.scrollPrev();
-      }
-      lastScrollTime = now;
+    return () => {
+      embla.off("select", onSelect);
+      embla.off("reInit", onSelect);
     };
-    node.addEventListener("wheel", onWheel, { passive: false });
-    return () => node.removeEventListener("wheel", onWheel);
   }, [embla]);
 
   return (
@@ -104,7 +74,7 @@ export function ClipsCarousel({
           </Link>
         </div>
 
-        <div className="relative mt-8" ref={wheelRef}>
+        <div className="relative mt-8">
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex gap-6">
               {items.map((clip, i) => (
@@ -152,18 +122,16 @@ export function ClipsCarousel({
           <button
             type="button"
             onClick={() => embla?.scrollPrev()}
-            disabled={!canPrev}
             aria-label="Previous"
-            className="absolute -left-2 top-1/2 hidden -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/90 p-3 text-white shadow-lg backdrop-blur transition disabled:opacity-30 md:inline-flex"
+            className="absolute -left-2 top-1/2 hidden -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/90 p-3 text-white shadow-lg backdrop-blur transition md:inline-flex hover:bg-card"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <button
             type="button"
             onClick={() => embla?.scrollNext()}
-            disabled={!canNext}
             aria-label="Next"
-            className="absolute -right-2 top-1/2 hidden -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/90 p-3 text-white shadow-lg backdrop-blur transition disabled:opacity-30 md:inline-flex"
+            className="absolute -right-2 top-1/2 hidden -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/90 p-3 text-white shadow-lg backdrop-blur transition md:inline-flex hover:bg-card"
           >
             <ChevronRight className="h-4 w-4" />
           </button>

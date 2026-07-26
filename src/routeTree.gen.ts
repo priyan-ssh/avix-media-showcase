@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ClipsRouteImport } from './routes/clips'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as HealthRouteImport } from './routes/health'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HealthRoute = HealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/clips': typeof ClipsRoute
   '/contact': typeof ContactRoute
+  '/health': typeof HealthRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/clips': typeof ClipsRoute
   '/contact': typeof ContactRoute
+  '/health': typeof HealthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,14 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/clips': typeof ClipsRoute
   '/contact': typeof ContactRoute
+  '/health': typeof HealthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/admin' | '/clips' | '/contact'
+  fullPaths: '/' | '/about' | '/admin' | '/clips' | '/contact' | '/health'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/admin' | '/clips' | '/contact'
-  id: '__root__' | '/' | '/about' | '/admin' | '/clips' | '/contact'
+  to: '/' | '/about' | '/admin' | '/clips' | '/contact' | '/health'
+  id: '__root__' | '/' | '/about' | '/admin' | '/clips' | '/contact' | '/health'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +86,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   ClipsRoute: typeof ClipsRoute
   ContactRoute: typeof ContactRoute
+  HealthRoute: typeof HealthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +126,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/health': {
+      id: '/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +142,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   ClipsRoute: ClipsRoute,
   ContactRoute: ContactRoute,
+  HealthRoute: HealthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
