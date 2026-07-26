@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
+import { contentQueryOptions, clipsQueryOptions } from "../hooks/useContent";
 
 function NotFoundComponent() {
   return (
@@ -73,6 +74,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  loader: async ({ context: { queryClient } }) => {
+    await Promise.all([
+      queryClient.ensureQueryData(contentQueryOptions("site")),
+      queryClient.ensureQueryData(contentQueryOptions("home")),
+      queryClient.ensureQueryData(clipsQueryOptions),
+    ]);
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },

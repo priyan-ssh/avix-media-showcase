@@ -881,6 +881,57 @@ function SortableClipRow({
 
 /* ─── Media / Video / Image Upload Field ───────────────────── */
 
+async function compressImageForUpload(file: File): Promise<File> {
+  if (!file.type.startsWith("image/") || file.type.includes("gif") || file.type.includes("svg")) {
+    return file;
+  }
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const maxDim = 1920;
+      let w = img.width;
+      let h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) {
+          h = Math.round((h * maxDim) / w);
+          w = maxDim;
+        } else {
+          w = Math.round((w * maxDim) / h);
+          h = maxDim;
+        }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(file);
+        return;
+      }
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob || blob.size >= file.size) {
+            resolve(file);
+            return;
+          }
+          const newName = file.name.replace(/\.[^/.]+$/, "") + ".webp";
+          resolve(new File([blob], newName, { type: "image/webp" }));
+        },
+        "image/webp",
+        0.82
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file);
+    };
+    img.src = url;
+  });
+}
+
 function MediaUploadField({
   clipId,
   label = "Image / Video",
@@ -896,14 +947,15 @@ function MediaUploadField({
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const upload = async (file: File) => {
+  const upload = async (rawFile: File) => {
     setUploading(true);
     setError(null);
+    const file = await compressImageForUpload(rawFile);
     const ext = file.name.split(".").pop() ?? "bin";
     const filename = `media_${clipId}_${crypto.randomUUID()}.${ext}`;
     const { error: upErr } = await supabase.storage
       .from("media")
-      .upload(filename, file, { upsert: false });
+      .upload(filename, file, { upsert: false, cacheControl: "31536000" });
     if (upErr) {
       setError(upErr.message);
       setUploading(false);

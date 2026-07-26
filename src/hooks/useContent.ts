@@ -14,21 +14,23 @@ const fallbacks = {
 
 export type PageKey = keyof typeof fallbacks;
 
+export const contentQueryOptions = <K extends PageKey>(page: K) => ({
+  queryKey: ["site_content", page],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("site_content")
+      .select("data")
+      .eq("page", page)
+      .maybeSingle();
+    if (error) throw error;
+    return (data?.data ?? fallbacks[page]) as (typeof fallbacks)[K];
+  },
+  placeholderData: fallbacks[page] as (typeof fallbacks)[K],
+  staleTime: 60_000,
+});
+
 export function useContent<K extends PageKey>(page: K): (typeof fallbacks)[K] {
-  const query = useQuery({
-    queryKey: ["site_content", page],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("site_content")
-        .select("data")
-        .eq("page", page)
-        .maybeSingle();
-      if (error) throw error;
-      return (data?.data ?? fallbacks[page]) as (typeof fallbacks)[K];
-    },
-    initialData: fallbacks[page] as (typeof fallbacks)[K],
-    staleTime: 30_000,
-  });
+  const query = useQuery(contentQueryOptions(page));
   return (query.data ?? fallbacks[page]) as (typeof fallbacks)[K];
 }
 
@@ -54,19 +56,21 @@ const clipsFallback: DbClip[] = (homeJson.clips.items ?? []).map((c, i) => ({
   position: i + 1,
 }));
 
+export const clipsQueryOptions = {
+  queryKey: ["clips"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("clips")
+      .select("*")
+      .order("position", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as DbClip[];
+  },
+  placeholderData: clipsFallback,
+  staleTime: 60_000,
+};
+
 export function useClips(): DbClip[] {
-  const query = useQuery({
-    queryKey: ["clips"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("clips")
-        .select("*")
-        .order("position", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as DbClip[];
-    },
-    initialData: clipsFallback,
-    staleTime: 30_000,
-  });
+  const query = useQuery(clipsQueryOptions);
   return (query.data ?? clipsFallback) as DbClip[];
 }

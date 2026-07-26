@@ -17,7 +17,7 @@ export function Logo({ className }: { className?: string }) {
       className={cn("flex items-center gap-2 font-black tracking-widest text-white", className)}
     >
       {logoUrl ? (
-        <img src={logoUrl} alt={brand} className="h-9 max-w-[160px] object-contain" />
+        <img src={logoUrl} alt={brand} className="h-10 sm:h-11 w-auto max-w-[220px] object-contain" />
       ) : (
         <>
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary">
