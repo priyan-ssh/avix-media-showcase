@@ -77,7 +77,7 @@ export function ClipsCarousel({
               {eyebrow}
             </h2>
           </div>
-          <CtaLink to={viewAll.to} variant="outline" size="sm">
+          <CtaLink to={viewAll.to} variant="outline" size="md">
             {viewAll.label} <ArrowRight className="h-3.5 w-3.5 text-primary" />
           </CtaLink>
         </div>

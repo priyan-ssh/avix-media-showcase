@@ -22,11 +22,10 @@ export const contentQueryOptions = <K extends PageKey>(page: K) => ({
       .select("data")
       .eq("page", page)
       .maybeSingle();
-    if (error) throw error;
+    if (error) console.error("Supabase content fetch error:", error);
     return (data?.data ?? fallbacks[page]) as (typeof fallbacks)[K];
   },
-  placeholderData: fallbacks[page] as (typeof fallbacks)[K],
-  staleTime: 60_000,
+  staleTime: 500,
 });
 
 export function useContent<K extends PageKey>(page: K): (typeof fallbacks)[K] {
