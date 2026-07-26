@@ -18,8 +18,9 @@ export function Showreel({
 
   return (
     <section id="showreel" className="relative border-b border-border bg-background overflow-hidden">
-      {/* Blue/Cyan ambient spotlight behind showreel like in Site 2.png - z-0 so it sits IN FRONT of the black background! */}
+      {/* Blue/Cyan ambient spotlight behind showreel like in Site 2.png - z-0 so it sits IN FRONT of the black background! (COMMENTED OUT TO MATCH HERO)
       <div className="absolute top-1/2 right-1/4 z-0 h-[500px] w-[600px] -translate-y-1/2 rounded-full bg-sky-500/25 blur-[150px] pointer-events-none" />
+      */}
 
       <Container className="grid grid-cols-1 gap-10 py-16 md:grid-cols-12 md:py-24 relative z-10">
         <div className="md:col-span-5 flex flex-col justify-center z-10">
@@ -46,7 +47,7 @@ export function Showreel({
         </div>
 
         <div className="md:col-span-7 relative flex items-center justify-end -mr-16 lg:-mr-28">
-          {/* Vibrant Permanent Cyan Spotlight + Dynamic Highlighted Color Glow Backlight sitting at z-0! */}
+          {/* Vibrant Permanent Cyan Spotlight + Dynamic Highlighted Color Glow Backlight sitting at z-0! (COMMENTED OUT TO MATCH HERO)
           <div className="absolute -inset-10 rounded-full bg-sky-500/50 blur-[100px] pointer-events-none z-0" />
           <div 
             className="absolute -inset-20 rounded-full blur-[90px] opacity-100 pointer-events-none z-0 transition-all duration-1000"
@@ -55,6 +56,7 @@ export function Showreel({
               boxShadow: `0 0 160px 80px ${glowColor}`
             }}
           />
+          */}
 
           {/* BIGGER & STRONGER CIRCULAR BLACK CLOUD AT z-5 MERGING OUTWARDS INTO CYAN GLOW! */}
           <div className="absolute -inset-16 rounded-full bg-[#0a0a0a] blur-[50px] opacity-100 pointer-events-none z-5" />
