@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ArrowRight, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Container } from "./primitives";
 import { MediaPlaceholder } from "./MediaPlaceholder";
 import { cn } from "@/lib/utils";
@@ -38,10 +39,12 @@ export function ClipsCarousel({
   const [emblaRef, embla] = useEmblaCarousel({
     align: "start",
     loop: false,
+    dragFree: true,
     slidesToScroll: 1,
   });
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(true);
+  const wheelRef = useRef<HTMLDivElement | null>(null);
 
   const onSelect = useCallback(() => {
     if (!embla) return;
@@ -55,6 +58,27 @@ export function ClipsCarousel({
     embla.on("select", onSelect);
     embla.on("reInit", onSelect);
   }, [embla, onSelect]);
+
+  useEffect(() => {
+    if (!embla) return;
+    const node = wheelRef.current;
+    if (!node) return;
+    const onWheel = (e: WheelEvent) => {
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (delta === 0) return;
+      e.preventDefault();
+      const engine = embla.internalEngine();
+      const loc = engine.location.get();
+      engine.location.set(loc - delta);
+      engine.target.set(loc - delta);
+      engine.scrollLooper.loop(-1);
+      engine.slideLooper.loop();
+      engine.translate.to(loc - delta);
+      engine.animation.start();
+    };
+    node.addEventListener("wheel", onWheel, { passive: false });
+    return () => node.removeEventListener("wheel", onWheel);
+  }, [embla]);
 
   return (
     <section className="border-b border-border bg-background">
