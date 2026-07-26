@@ -37,10 +37,14 @@ export function ClipsCarousel({
   viewAll: { label: string; to: string };
   items: Clip[];
 }) {
-  // WheelGesturesPlugin handles wheel events natively, giving smooth pixel-level
-  // continuous scroll that feeds directly into Embla's physics engine.
+  // Ensure we have enough slides for Embla's loop engine (needs >2x container width)
+  const displayItems =
+    items.length > 0 && items.length < 8 ? [...items, ...items, ...items, ...items] : items;
+
+  // WheelGesturesPlugin handles horizontal trackpad swipes & wheel events smoothly.
+  // We do NOT set forceWheelAxis: "y" so normal vertical page scroll is never hijacked.
   const [emblaRef, embla] = useEmblaCarousel({ align: "start", loop: true, dragFree: true }, [
-    WheelGesturesPlugin({ forceWheelAxis: "y" }),
+    WheelGesturesPlugin(),
   ]);
 
   const [, forceUpdate] = useState(0);
@@ -77,7 +81,7 @@ export function ClipsCarousel({
         <div className="relative mt-8">
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex gap-6">
-              {items.map((clip, i) => (
+              {displayItems.map((clip, i) => (
                 <div key={i} className="min-w-0 shrink-0 basis-[80%] sm:basis-[45%] md:basis-[32%]">
                   <div
                     className={cn(
