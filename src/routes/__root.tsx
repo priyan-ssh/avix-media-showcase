@@ -122,29 +122,6 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en" className="dark">
       <head>
         <HeadContent />
-        {/* GitHub Pages SPA redirect receiver — restores the path pushed by 404.html */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-          (function() {
-            var redirect = sessionStorage.redirect;
-            delete sessionStorage.redirect;
-            if (redirect && redirect !== location.href) {
-              history.replaceState(null, null, redirect);
-            }
-            // Handle the ?/ query-string redirect from 404.html
-            var search = window.location.search;
-            if (search.slice(1,2) === '/') {
-              var decoded = search.slice(1).replace(/~and~/g, '&');
-              window.history.replaceState(null, null,
-                window.location.pathname.slice(0, -1) + decoded +
-                (window.location.hash ? window.location.hash : '')
-              );
-            }
-          })();
-        `,
-          }}
-        />
       </head>
       <body className="bg-background text-foreground">
         {children}
