@@ -46,37 +46,29 @@ export function Showreel({
           </div>
         </div>
 
-        <div className="md:col-span-7 relative flex items-center justify-end -mr-16 lg:-mr-28">
-          {/* Vibrant Permanent Cyan Spotlight + Dynamic Highlighted Color Glow Backlight sitting at z-0! (COMMENTED OUT TO MATCH HERO)
-          <div className="absolute -inset-10 rounded-full bg-sky-500/50 blur-[100px] pointer-events-none z-0" />
-          <div 
-            className="absolute -inset-20 rounded-full blur-[90px] opacity-100 pointer-events-none z-0 transition-all duration-1000"
-            style={{ 
-              background: `radial-gradient(circle at center, ${glowColor} 0%, transparent 70%)`,
-              boxShadow: `0 0 160px 80px ${glowColor}`
-            }}
-          />
-          */}
+        <div className="md:col-span-7 relative flex items-center justify-end -mr-6 lg:-mr-10">
+          {/* Balanced Blue / Cyan ambient backlight glow: Left, Top, Bottom & Center (No Glow on Right) */}
+          <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[540px] rounded-full bg-sky-500/45 blur-[110px] pointer-events-none z-0" />
+          <div className="absolute top-1/4 -left-12 h-[320px] w-[350px] rounded-full bg-cyan-400/35 blur-[90px] pointer-events-none z-0" />
+          <div className="absolute bottom-1/4 -left-12 h-[320px] w-[350px] rounded-full bg-sky-400/35 blur-[90px] pointer-events-none z-0" />
 
-          {/* BIGGER & STRONGER CIRCULAR BLACK CLOUD AT z-5 MERGING OUTWARDS INTO CYAN GLOW! */}
+          {/* CIRCULAR BLACK CLOUD AT z-5 MERGING OUTWARDS RADIALLY LIKE HERO! */}
           <div className="absolute -inset-16 rounded-full bg-[#0a0a0a] blur-[50px] opacity-100 pointer-events-none z-5" />
           <div className="absolute -inset-24 rounded-full bg-[#0a0a0a] blur-[90px] opacity-95 pointer-events-none z-5" />
 
-          {/* Deep edgeless showreel container offset towards right edge with solid black edge fading! */}
+          {/* Deep edgeless showreel container */}
           <div className="relative w-full max-w-[650px] overflow-hidden bg-transparent z-10">
             <MediaPlaceholder
               src={data.image}
               alt="Showreel thumbnail"
-              aspect="16/9"
+              aspect="16/10.5"
               priority={true}
-              className="w-full h-full object-cover rounded-none border-0"
+              className="w-full h-full object-cover object-[center_0%] rounded-none border-0"
             />
-            {/* CUSTOM INNER BLACK: More on top, reduced on right! */}
+            {/* INNER RADIAL BLACK VIGNETTE: Radiates outwards from center like Hero */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(10,10,10,0.75)_80%,#0a0a0a_98%)] pointer-events-none" />
-            <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/90 to-transparent pointer-events-none" />
-            <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/85 to-transparent pointer-events-none" />
-            <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent pointer-events-none" />
-            <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent pointer-events-none" />
+            <div className="absolute inset-y-0 left-0 w-28 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent pointer-events-none" />
+            <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent pointer-events-none" />
           </div>
         </div>
       </Container>
