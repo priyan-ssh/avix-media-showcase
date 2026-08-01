@@ -19,23 +19,15 @@ export function Hero({ data }: { data: Hero }) {
       <Container className="grid grid-cols-1 gap-8 py-16 md:grid-cols-12 md:gap-8 md:py-24 relative z-10">
         <div className="md:col-span-6 flex flex-col justify-center z-10">
           <Eyebrow>{data.eyebrow}</Eyebrow>
-          <AccentTitle parts={data.titleParts} className="mt-6 text-5xl md:text-6xl lg:text-7xl" />
+          <div className="relative z-20">
+            <AccentTitle parts={data.titleParts} className="mt-6 text-5xl md:text-6xl lg:text-7xl" />
+          </div>
 
           {/* MOBILE ONLY: Display hero image immediately below headline on phone screens! */}
-          <div className="mt-8 md:hidden relative flex items-center justify-center">
-            {/* Vibrant Permanent Red Spotlight + Dynamic Highlighted Color Glow Backlight sitting at z-0! (COMMENTED OUT AS REQUESTED)
-            <div className="absolute -inset-8 rounded-full bg-primary/60 blur-[90px] pointer-events-none z-0" />
-            <div 
-              className="absolute -inset-16 rounded-full blur-[80px] opacity-100 pointer-events-none z-0 transition-all duration-1000"
-              style={{ 
-                background: `radial-gradient(circle at center, ${glowColor} 0%, transparent 70%)`,
-                boxShadow: `0 0 140px 70px ${glowColor}`
-              }}
-            />
-            */}
-            {/* BIGGER & STRONGER CIRCULAR BLACK CLOUD AT z-5 MERGING OUTWARDS INTO RED GLOW! */}
-            <div className="absolute -inset-14 rounded-full bg-[#0a0a0a] blur-[45px] opacity-100 pointer-events-none z-5" />
-            <div className="absolute -inset-20 rounded-full bg-[#0a0a0a] blur-[80px] opacity-95 pointer-events-none z-5" />
+          <div className="mt-8 md:hidden relative flex items-center justify-center overflow-hidden isolate rounded-2xl py-4">
+            {/* Contained black cloud backdrop for mobile without text bleeding */}
+            <div className="absolute -inset-4 rounded-full bg-[#0a0a0a] blur-[25px] opacity-100 pointer-events-none z-5" />
+            <div className="absolute -inset-8 rounded-full bg-[#0a0a0a] blur-[40px] opacity-95 pointer-events-none z-5" />
             <div className="relative w-full max-w-[450px] overflow-hidden bg-transparent z-10">
               <MediaPlaceholder
                 src={data.image}
@@ -53,7 +45,7 @@ export function Hero({ data }: { data: Hero }) {
             </div>
           </div>
 
-          <p className="mt-6 max-w-md text-sm md:text-base text-muted-foreground leading-relaxed">
+          <p className="relative z-20 mt-6 max-w-md text-sm md:text-base text-muted-foreground leading-relaxed">
             {data.subtext}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">

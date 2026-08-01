@@ -19,12 +19,12 @@
   "partners": {
     "label": "I'VE WORKED WITH",
     "logos": [
-      { "name": "DOPE AS USUAL", "url": "https://youtube.com" },
-      { "name": "SIDE+", "url": "https://sideplus.com" },
-      { "name": "YOU SHOULD KNOW PODCAST", "url": "https://youtube.com" },
-      { "name": "LEADER STUDIOS", "url": "https://leaderstudios.co" },
-      { "name": "STIFF SOCKS", "url": "https://youtube.com" },
-      { "name": "TECH N9NE", "url": "https://strangemusicinc.com" }
+      { "name": "DOPE AS USUAL", "url": "https://youtube.com", "logo": "" },
+      { "name": "SIDE+", "url": "https://sideplus.com", "logo": "" },
+      { "name": "YOU SHOULD KNOW PODCAST", "url": "https://youtube.com", "logo": "" },
+      { "name": "LEADER STUDIOS", "url": "https://leaderstudios.co", "logo": "" },
+      { "name": "STIFF SOCKS", "url": "https://youtube.com", "logo": "" },
+      { "name": "TECH N9NE", "url": "https://strangemusicinc.com", "logo": "" }
     ]
   },
   "showreel": {

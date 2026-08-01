@@ -25,6 +25,24 @@ export function MediaPlaceholder({
   }, [src]);
 
   if (src && !hasError) {
+    const isInstagram = /instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/i.test(src);
+    if (isInstagram) {
+      const match = src.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/i);
+      const embedUrl = match ? `https://www.instagram.com/${match[1]}/${match[2]}/embed` : src;
+      return (
+        <div className={cn("relative overflow-hidden bg-black", className)} style={{ aspectRatio: aspect }}>
+          <iframe
+            src={embedUrl}
+            className="w-full h-full border-0 bg-black"
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
+            allowFullScreen
+            title={alt}
+            scrolling="no"
+          />
+        </div>
+      );
+    }
+
     const isVideo = /\.(mp4|webm|mov|m4v|ogg|qt|mkv|avi)(\?|#|$)/i.test(src);
 
     if (isVideo) {
