@@ -85,17 +85,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Aviix Media — Video Editing & Content Creation" },
+      { title: "Aviix Media — Premier Video Editing & Content Creation" },
       {
         name: "description",
         content:
-          "Aviix Media edits long-form content into high-impact videos that generate views and grow audiences for creators and brands.",
+          "Aviix Media is a high-impact video editing agency turning long-form content into viral videos with 400M+ views generated worldwide.",
       },
       { name: "author", content: "Aviix Media" },
-      { property: "og:title", content: "Aviix Media — Video Editing & Content Creation" },
+      { property: "og:title", content: "Aviix Media — Premier Video Editing & Content Creation" },
       {
         property: "og:description",
-        content: "Long-form content turned into engaging videos that people actually watch.",
+        content: "Aviix Media is a high-impact video editing agency turning long-form content into viral videos with 400M+ views generated worldwide.",
       },
       { property: "og:type", content: "website" },
       { property: "og:image", content: "https://aviixmedia.com/logo.png" },
@@ -104,6 +104,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "canonical", href: "https://aviixmedia.com" },
+      { rel: "llms", href: "/llms.txt" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
       {
