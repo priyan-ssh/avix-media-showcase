@@ -48,14 +48,20 @@ export function Hero({ data }: { data: Hero }) {
           <p className="relative z-20 mt-6 max-w-md text-sm md:text-base text-muted-foreground leading-relaxed">
             {data.subtext}
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <CtaLink to={data.primaryCta.to} variant="red" size="lg">
-              {data.primaryCta.label} <ArrowRight className="h-4 w-4" />
-            </CtaLink>
-            <CtaLink to={data.secondaryCta.to} variant="outline" size="lg">
-              {data.secondaryCta.label} <ArrowRight className="h-4 w-4 text-primary" />
-            </CtaLink>
-          </div>
+          {(data.primaryCta?.show !== false || data.secondaryCta?.show !== false) && (
+            <div className="mt-8 flex flex-wrap gap-3">
+              {data.primaryCta?.show !== false && (
+                <CtaLink to={data.primaryCta.to} variant="red" size="lg">
+                  {data.primaryCta.label} <ArrowRight className="h-4 w-4" />
+                </CtaLink>
+              )}
+              {data.secondaryCta?.show !== false && (
+                <CtaLink to={data.secondaryCta.to} variant="outline" size="lg">
+                  {data.secondaryCta.label} <ArrowRight className="h-4 w-4 text-primary" />
+                </CtaLink>
+              )}
+            </div>
+          )}
           <div className="mt-14 hidden md:flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
             <span className="inline-flex h-7 w-4 items-start justify-center rounded-full border-2 border-muted-foreground/60 p-1">
               <span className="h-1.5 w-1 rounded-full bg-white animate-bounce" />

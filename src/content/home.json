@@ -6,8 +6,8 @@
       { "text": "WATCH.", "accent": true }
     ],
     "subtext": "Helping creators and brands turn long-form content into engaging videos that generate views and grow audiences.",
-    "primaryCta": { "label": "VIEW MY WORK", "to": "/#showreel" },
-    "secondaryCta": { "label": "BOOK A CALL", "to": "/contact" },
+    "primaryCta": { "label": "VIEW MY WORK", "to": "/#showreel", "show": false },
+    "secondaryCta": { "label": "BOOK A CALL", "to": "/contact", "show": true },
     "image": ""
   },
   "stats": [
@@ -31,7 +31,7 @@
     "eyebrow": "SHOWREEL 2024",
     "title": "A QUICK LOOK AT MY STYLE.",
     "subtext": "Edits. Storytelling. Impact.",
-    "cta": { "label": "WATCH SHOWREEL", "href": "#" },
+    "cta": { "label": "WATCH SHOWREEL", "href": "#", "show": false },
     "image": ""
   },
   "clips": {

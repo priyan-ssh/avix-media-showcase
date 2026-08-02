@@ -623,6 +623,21 @@ function DynamicForm({
                   onChange={(v) => onChange({ ...data, [key]: v })}
                 />
               </FieldSection>
+            ) : typeof data[key] === "boolean" ? (
+              <div className="flex items-center justify-between rounded-md border border-border bg-background/50 px-3 py-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Show / Enable ({key})
+                </span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(data[key])}
+                    onChange={(e) => onChange({ ...data, [key]: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-9 h-5 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                </label>
+              </div>
             ) : key === "image" ||
               key === "video" ||
               key === "logo" ||

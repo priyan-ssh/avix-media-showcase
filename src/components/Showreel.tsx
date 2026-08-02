@@ -35,15 +35,17 @@ export function Showreel({
           <p className="mt-4 text-sm md:text-base text-muted-foreground leading-relaxed">
             {data.subtext}
           </p>
-          <div className="mt-8 hidden">
-            <a
-              href={data.cta.href}
-              className="inline-flex items-center gap-3 rounded-full bg-white px-7 py-4 text-xs font-bold uppercase tracking-widest text-black transition hover:bg-white/90 shadow-xl"
-            >
-              <Play className="h-3.5 w-3.5 fill-current" />
-              {data.cta.label}
-            </a>
-          </div>
+          {data.cta?.show !== false && (
+            <div className="mt-8">
+              <a
+                href={data.cta.href}
+                className="inline-flex items-center gap-3 rounded-full bg-white px-7 py-4 text-xs font-bold uppercase tracking-widest text-black transition hover:bg-white/90 shadow-xl"
+              >
+                <Play className="h-3.5 w-3.5 fill-current" />
+                {data.cta.label}
+              </a>
+            </div>
+          )}
         </div>
 
         <div className="md:col-span-7 relative flex items-center justify-end -mr-6 lg:-mr-10">
