@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Container } from "./primitives";
 
 export type PartnerItem =
@@ -11,51 +12,78 @@ export function PartnerLogos({
   label: string;
   logos: PartnerItem[];
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   if (!logos || logos.length === 0) return null;
 
-  // Duplicate items to ensure a seamless 100% infinite scroll loop
-  const marqueeItems = [...logos, ...logos, ...logos, ...logos];
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (containerRef.current && (Math.abs(e.deltaX) > 0 || Math.abs(e.deltaY) > 0)) {
+      containerRef.current.scrollLeft += e.deltaY || e.deltaX;
+    }
+  };
+
+  const renderTrack = (ariaHidden = false) => (
+    <div
+      aria-hidden={ariaHidden}
+      className="flex shrink-0 items-center gap-14 sm:gap-20 md:gap-24 pr-14 sm:pr-20 md:pr-24 animate-marquee group-hover/marquee:[animation-play-state:paused] py-6 select-none"
+    >
+      {logos.map((item, i) => {
+        const name = typeof item === "string" ? item : item.name;
+        const targetUrl = typeof item === "string" ? "#" : item.url || "#";
+        const logo = typeof item === "string" ? undefined : item.logo;
+        const href = targetUrl && targetUrl !== "#" ? targetUrl : `https://google.com/search?q=${encodeURIComponent(name)}`;
+
+        return (
+          <div key={`${name}-${i}`} className="relative group/item shrink-0 pb-6">
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={name}
+              tabIndex={ariaHidden ? -1 : undefined}
+              className="flex items-center justify-center transition-all duration-300 no-underline px-2"
+            >
+              {logo ? (
+                <img
+                  src={logo}
+                  alt={name}
+                  className="h-12 sm:h-16 md:h-20 w-auto max-w-[200px] sm:max-w-[240px] md:max-w-[280px] object-contain drop-shadow-md transition-all duration-300 group-hover/item:scale-110"
+                />
+              ) : (
+                <span className="text-base sm:text-xl md:text-2xl font-black uppercase tracking-widest text-white transition-all duration-300 group-hover/item:text-primary group-hover/item:scale-105">
+                  {name}
+                </span>
+              )}
+            </a>
+
+            {/* Hover Tooltip Pill - Positioned cleanly BELOW logo so it is never cut off by section top */}
+            <div className="absolute top-full -mt-2 left-1/2 -translate-x-1/2 pointer-events-none opacity-0 group-hover/item:opacity-100 transition-all duration-200 bg-zinc-900/95 border border-border text-[10px] font-bold uppercase tracking-wider text-white px-2.5 py-1 rounded-md shadow-2xl whitespace-nowrap z-50">
+              {name} ↗
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 
   return (
     <section className="border-b border-border bg-background overflow-hidden py-10 md:py-14">
-      <Container className="mb-6">
+      <Container className="mb-4">
         <p className="text-center text-[11px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
           {label}
         </p>
       </Container>
 
-      {/* Infinite Scrolling Marquee Container with subtle edge fade masks */}
-      <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
-        <div className="flex w-max items-center gap-12 sm:gap-16 md:gap-20 animate-marquee hover:[animation-play-state:paused] py-2">
-          {marqueeItems.map((item, i) => {
-            const name = typeof item === "string" ? item : item.name;
-            const url = typeof item === "string" ? "#" : item.url || "#";
-            const logo = typeof item === "string" ? undefined : item.logo;
-            const isExternal = url !== "#" && url.startsWith("http");
-
-            return (
-              <a
-                key={`${name}-${i}`}
-                href={url}
-                target={isExternal ? "_blank" : undefined}
-                rel={isExternal ? "noopener noreferrer" : undefined}
-                className="group flex items-center justify-center shrink-0 transition-all duration-300 no-underline"
-              >
-                {logo ? (
-                  <img
-                    src={logo}
-                    alt={name}
-                    className="h-8 sm:h-10 md:h-12 w-auto max-w-[140px] md:max-w-[180px] object-contain filter grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
-                  />
-                ) : (
-                  <span className="text-sm md:text-base font-black uppercase tracking-widest text-muted-foreground/80 group-hover:text-white group-hover:scale-105 transition-all duration-300">
-                    {name}
-                  </span>
-                )}
-              </a>
-            );
-          })}
-        </div>
+      {/* 100% Gapless Infinite Scrolling & Horizontal Wheel Scrollable Marquee */}
+      <div
+        ref={containerRef}
+        onWheel={handleWheel}
+        className="group/marquee flex relative w-full overflow-x-auto no-scrollbar [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
+      >
+        {renderTrack(false)}
+        {renderTrack(true)}
+        {renderTrack(true)}
+        {renderTrack(true)}
       </div>
     </section>
   );
