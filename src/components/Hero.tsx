@@ -48,9 +48,9 @@ export function Hero({ data }: { data: Hero }) {
           <p className="relative z-20 mt-6 max-w-md text-sm md:text-base text-muted-foreground leading-relaxed">
             {data.subtext}
           </p>
-          {(data.primaryCta?.show !== false || data.secondaryCta?.show !== false) && (
+          {(Boolean(data.primaryCta?.show) || data.secondaryCta?.show !== false) && (
             <div className="mt-8 flex flex-wrap gap-3">
-              {data.primaryCta?.show !== false && (
+              {Boolean(data.primaryCta?.show) && (
                 <CtaLink to={data.primaryCta.to} variant="red" size="lg">
                   {data.primaryCta.label} <ArrowRight className="h-4 w-4" />
                 </CtaLink>

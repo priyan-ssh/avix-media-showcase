@@ -6,8 +6,8 @@
       { "text": "WATCH.", "accent": true }
     ],
     "subtext": "Helping creators and brands turn long-form content into engaging videos that generate views and grow audiences.",
-    "primaryCta": { "label": "VIEW MY WORK", "to": "/#showreel" },
-    "secondaryCta": { "label": "BOOK A CALL", "to": "/contact" },
+    "primaryCta": { "label": "VIEW MY WORK", "to": "/#showreel", "show": false },
+    "secondaryCta": { "label": "BOOK A CALL", "to": "/contact", "show": true },
     "image": ""
   },
   "stats": [
