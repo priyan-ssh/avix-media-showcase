@@ -39,3 +39,8 @@ dist-ssr
 # Supabase CLI temp files
 supabase/.temp/
 
+# AI Agent Skills & Locks
+.agents/
+skills-lock.json
+
+

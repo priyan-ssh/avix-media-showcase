@@ -17,6 +17,15 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { supabase } from "@/integrations/supabase/client";
 import { Container } from "@/components/primitives";
+import { Hero } from "@/components/Hero";
+import { StatsBar } from "@/components/StatsBar";
+import { PartnerLogos } from "@/components/PartnerLogos";
+import { Showreel } from "@/components/Showreel";
+import { ClipsCarousel } from "@/components/ClipsCarousel";
+import { BottomCTA } from "@/components/BottomCTA";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { useClips } from "@/hooks/useContent";
 import { cn } from "@/lib/utils";
 import {
   LogOut,
@@ -436,6 +445,29 @@ function FieldSection({
 
 /* ─── Content Editor (Visual Form) ─────────────────────── */
 
+function deepMerge(target: any, source: any): any {
+  if (typeof target !== "object" || target === null) return source ?? target;
+  if (typeof source !== "object" || source === null) return target;
+
+  if (Array.isArray(target)) {
+    if (!Array.isArray(source) || source.length === 0) return target;
+    return source.map((item: any, i: number) => {
+      const targetSample = target[i] ?? target[0];
+      return deepMerge(targetSample, item);
+    });
+  }
+
+  const result: any = { ...target, ...source };
+  for (const k of Object.keys(target)) {
+    if (k in source) {
+      result[k] = deepMerge(target[k], source[k]);
+    } else {
+      result[k] = target[k];
+    }
+  }
+  return result;
+}
+
 function ContentEditor({ page }: { page: "home" | "about" | "contact" | "site" }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
@@ -450,9 +482,9 @@ function ContentEditor({ page }: { page: "home" | "about" | "contact" | "site" }
       .select("data")
       .eq("page", page)
       .maybeSingle();
-    // Use imported fallback JSON if no DB row exists
+    // Deep merge template fallback JSON with DB data so all new logo and show fields exist
     const fallbackMod = await import(`@/content/${page}.json`);
-    setData(row?.data ?? fallbackMod.default);
+    setData(deepMerge(fallbackMod.default, row?.data ?? {}));
     setLoading(false);
   }, [page]);
 
@@ -496,16 +528,103 @@ function ContentEditor({ page }: { page: "home" | "about" | "contact" | "site" }
         <DynamicForm data={data} onChange={setData} />
       </div>
 
-      {/* ── Right: Live Preview ── */}
-      <div className="hidden xl:block">
-        <div className="sticky top-4">
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Live Preview
+      {/* ── Right: Live Visual Webpage Preview ── */}
+      <LiveSitePreview page={page} data={data} />
+    </div>
+  );
+}
+
+/* ─── Live Site Visual Preview Component ──────────────────── */
+function LiveSitePreview({ page }: { page: string }) {
+  const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
+  const [key, setKey] = useState(0);
+
+  const routePath = page === "home" ? "/" : page === "site" ? "/" : `/${page}`;
+  const reloadPreview = () => setKey((k) => k + 1);
+
+  return (
+    <div className="hidden xl:block">
+      <div className="sticky top-4 flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            Live Site Preview
           </p>
-          <div className="max-h-[80vh] overflow-y-auto rounded-xl border border-border bg-zinc-950 p-4 text-xs">
-            <pre className="whitespace-pre-wrap break-all font-mono text-[10px] text-muted-foreground">
-              {JSON.stringify(data, null, 2)}
-            </pre>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setDevice("desktop")}
+              className={cn(
+                "rounded px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition",
+                device === "desktop" ? "bg-primary text-white shadow" : "bg-card text-muted-foreground hover:text-white"
+              )}
+            >
+              Desktop
+            </button>
+            <button
+              type="button"
+              onClick={() => setDevice("mobile")}
+              className={cn(
+                "rounded px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition",
+                device === "mobile" ? "bg-primary text-white shadow" : "bg-card text-muted-foreground hover:text-white"
+              )}
+            >
+              Mobile
+            </button>
+            <a
+              href={routePath}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded bg-card px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-white transition"
+            >
+              Open Tab ↗
+            </a>
+          </div>
+        </div>
+
+        {/* Browser Mockup Window Container */}
+        <div className="relative overflow-hidden rounded-xl border border-border bg-[#0a0a0a] shadow-2xl flex flex-col items-center">
+          {/* Top Browser Address Bar */}
+          <div className="w-full flex items-center justify-between border-b border-border/60 bg-zinc-900 px-3 py-2 text-[10px]">
+            <div className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
+              <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/80" />
+              <span className="h-2.5 w-2.5 rounded-full bg-green-500/80" />
+            </div>
+            <div className="flex items-center gap-1.5 rounded bg-black/60 px-3 py-0.5 text-[9px] font-mono text-muted-foreground">
+              <span>https://aviixmedia.com{routePath === "/" ? "" : routePath}</span>
+            </div>
+            <button
+              type="button"
+              onClick={reloadPreview}
+              title="Refresh Preview"
+              className="text-muted-foreground hover:text-white text-[10px] font-bold uppercase tracking-wider"
+            >
+              ↻ Refresh
+            </button>
+          </div>
+
+          {/* Iframe Viewport Container */}
+          <div className="w-full flex items-center justify-center p-2 bg-[#050505] min-h-[550px] max-h-[78vh] overflow-hidden">
+            {device === "desktop" ? (
+              <div className="w-full h-[72vh] overflow-hidden rounded-lg border border-border/40">
+                <iframe
+                  key={key}
+                  src={routePath}
+                  title="Live Site Preview"
+                  className="w-full h-full border-0 bg-background"
+                />
+              </div>
+            ) : (
+              <div className="w-[375px] h-[660px] overflow-hidden rounded-[32px] border-[6px] border-zinc-800 shadow-2xl my-2">
+                <iframe
+                  key={key}
+                  src={routePath}
+                  title="Mobile Site Preview"
+                  className="w-full h-full border-0 bg-background"
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -642,9 +761,16 @@ function DynamicForm({
               key === "video" ||
               key === "logo" ||
               key === "src" ||
+              key === "avatar" ||
+              key === "icon" ||
+              key === "photo" ||
               key.toLowerCase().includes("image") ||
               key.toLowerCase().includes("video") ||
-              key.toLowerCase().includes("logo") ? (
+              key.toLowerCase().includes("logo") ||
+              key.toLowerCase().includes("icon") ||
+              key.toLowerCase().includes("avatar") ||
+              key.toLowerCase().includes("photo") ||
+              key.toLowerCase().includes("src") ? (
               <MediaUploadField
                 clipId={`cms_${key}_${depth}`}
                 label={key}
@@ -834,6 +960,44 @@ function SortableClipRow({
     id: clip.id,
   });
   const style = { transform: CSS.Transform.toString(transform), transition };
+  const [fetchingIg, setFetchingIg] = useState(false);
+
+  const fetchIgDetails = async () => {
+    if (!clip.image.includes("instagram.com")) return;
+    setFetchingIg(true);
+    const match = clip.image.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/i);
+    try {
+      // Use corsproxy wrapper to avoid browser CORS block on instagram oembed endpoint
+      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(`https://www.instagram.com/oembed/?url=${clip.image}`)}`;
+      const res = await fetch(proxyUrl);
+      if (res.ok) {
+        const data = await res.json();
+        const updates: Partial<Clip> = {};
+        if (data.author_name) updates.brand = String(data.author_name).toUpperCase();
+        if (data.title) {
+          const firstLine = String(data.title).split("\n")[0].substring(0, 30);
+          updates.title = firstLine.toUpperCase();
+        }
+        if (Object.keys(updates).length > 0) {
+          onChange(updates);
+          setFetchingIg(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Instagram oembed CORS fallback", err);
+    }
+
+    // Smart fallback if oembed endpoint is rate-limited
+    if (match && match[2]) {
+      const shortcode = match[2].substring(0, 8).toUpperCase();
+      onChange({
+        brand: clip.brand || "INSTAGRAM REEL",
+        title: clip.title || `REEL #${shortcode}`,
+      });
+    }
+    setFetchingIg(false);
+  };
 
   return (
     <div
@@ -878,12 +1042,38 @@ function SortableClipRow({
               <option value="green">Green</option>
             </select>
           </div>
-          <MediaUploadField
-            clipId={clip.id}
-            label="Clip Video / Image"
-            currentUrl={clip.image}
-            onUploaded={(url) => onChange({ image: url })}
-          />
+          <div className="flex flex-col gap-1">
+            <MediaUploadField
+              clipId={clip.id}
+              label="Clip Video / Image"
+              currentUrl={clip.image}
+              onUploaded={(url) => onChange({ image: url })}
+            />
+            {clip.image && clip.image.includes("instagram.com") && (
+              <button
+                type="button"
+                onClick={fetchIgDetails}
+                disabled={fetchingIg}
+                className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-md bg-pink-600/20 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-pink-400 hover:bg-pink-600/30 disabled:opacity-60"
+              >
+                {fetchingIg ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+                Auto-fetch IG Details
+              </button>
+            )}
+          </div>
+          <div className="flex flex-col justify-end">
+            <label className="flex items-center justify-between gap-2 rounded-md border border-border bg-background/50 px-3 py-2 cursor-pointer h-[38px]">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Show Details Below Reel
+              </span>
+              <input
+                type="checkbox"
+                checked={(clip as any).show_details !== false}
+                onChange={(e) => onChange({ show_details: e.target.checked })}
+                className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary"
+              />
+            </label>
+          </div>
         </div>
 
         <button onClick={onDelete} className="mt-1 text-muted-foreground hover:text-primary">

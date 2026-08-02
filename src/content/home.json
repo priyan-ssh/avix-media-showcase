@@ -1,5 +1,6 @@
 {
   "hero": {
+    "show": true,
     "eyebrow": "VIDEO EDITING & CONTENT CREATION",
     "titleParts": [
       { "text": "EDITING VIDEOS THAT PEOPLE ACTUALLY " },
@@ -17,6 +18,7 @@
     { "value": "WORLDWIDE", "label": "CLIENTS" }
   ],
   "partners": {
+    "show": true,
     "label": "I'VE WORKED WITH",
     "logos": [
       { "name": "DOPE AS USUAL", "url": "https://youtube.com", "logo": "" },
@@ -28,6 +30,7 @@
     ]
   },
   "showreel": {
+    "show": true,
     "eyebrow": "SHOWREEL 2024",
     "title": "A QUICK LOOK AT MY STYLE.",
     "subtext": "Edits. Storytelling. Impact.",
@@ -35,6 +38,7 @@
     "image": ""
   },
   "clips": {
+    "show": true,
     "eyebrow": "FEATURED SHORT CLIPS",
     "viewAll": { "label": "VIEW ALL CLIPS", "to": "/clips" },
     "items": [
@@ -73,12 +77,14 @@
     ]
   },
   "bottomCta": {
+    "show": true,
     "eyebrow": "LET'S CREATE SOMETHING",
+    "title": "READY TO CREATE YOUR NEXT VIRAL VIDEO?",
     "titleParts": [
       { "text": "READY TO CREATE YOUR NEXT " },
       { "text": "VIRAL VIDEO?", "accent": true }
     ],
     "subtext": "Let's bring your ideas to life.",
-    "cta": { "label": "LET'S WORK TOGETHER", "to": "/contact" }
+    "cta": { "label": "LET'S WORK TOGETHER", "to": "/contact", "show": true }
   }
 }

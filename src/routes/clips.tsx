@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Container } from "@/components/primitives";
 import { MediaPlaceholder } from "@/components/MediaPlaceholder";
 import { Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useClips } from "@/hooks/useContent";
+import { InstagramReelModal } from "@/components/InstagramReelModal";
 
 const accentClass: Record<string, string> = {
   red: "text-primary",
@@ -40,6 +42,8 @@ export const Route = createFileRoute("/clips")({
 
 function ClipsPage() {
   const clips = useClips();
+  const [selectedReel, setSelectedReel] = useState<string | null>(null);
+  
   return (
     <section className="border-b border-border bg-background">
       <Container className="py-16 md:py-24">
@@ -62,8 +66,14 @@ function ClipsPage() {
             return (
               <div key={clip.id}>
                 <div
+                  onClick={() => {
+                    if (clip.image && clip.image.includes("instagram.com")) {
+                      setSelectedReel(clip.image);
+                    }
+                  }}
                   className={cn(
-                    "group relative overflow-hidden rounded-2xl border bg-card",
+                    "group relative overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:scale-[1.02]",
+                    clip.image && clip.image.includes("instagram.com") && "cursor-pointer",
                     ringClass[ac] ?? ringClass.red,
                   )}
                 >
@@ -73,34 +83,38 @@ function ClipsPage() {
                     aspect="9/16"
                     className="rounded-none border-0"
                   />
-                  <div className="absolute inset-0 flex flex-col justify-between p-5">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white/90">
-                      {clip.brand}
-                    </span>
-                    <div>
-                      <div className="text-2xl font-black uppercase leading-tight text-white">
-                        {clip.title}
+                </div>
+
+                {(clip as any).show_details !== false && (clip.brand || clip.title || clip.views) ? (
+                  <div className="mt-3.5 flex flex-col gap-1 px-1">
+                    {clip.brand && (
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        {clip.brand}
+                      </span>
+                    )}
+                    {(clip.title || clip.title_accent) && (
+                      <div className="text-base font-black uppercase leading-tight text-white">
+                        {clip.title} {clip.title_accent && <span className={accentClass[ac] ?? accentClass.red}>{clip.title_accent}</span>}
                       </div>
-                      <div
-                        className={cn(
-                          "text-2xl font-black uppercase leading-tight",
-                          accentClass[ac] ?? accentClass.red,
-                        )}
-                      >
-                        {clip.title_accent}
+                    )}
+                    {clip.views && (
+                      <div className="mt-1 flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
+                        <Play className="h-3 w-3 fill-primary text-primary" />
+                        {clip.views}
                       </div>
-                    </div>
+                    )}
                   </div>
-                </div>
-                <div className="mt-3 flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
-                  <Play className="h-3 w-3 fill-primary text-primary" />
-                  {clip.views}
-                </div>
+                ) : null}
               </div>
             );
           })}
         </div>
       </Container>
+      <InstagramReelModal
+        isOpen={!!selectedReel}
+        onClose={() => setSelectedReel(null)}
+        reelUrl={selectedReel}
+      />
     </section>
   );
 }

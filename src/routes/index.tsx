@@ -31,23 +31,28 @@ function HomePage() {
   const clips = useClips();
   return (
     <>
-      <Hero data={home.hero} />
-      <StatsBar stats={home.stats} />
-      <PartnerLogos label={home.partners.label} logos={home.partners.logos} />
-      <Showreel data={home.showreel} />
-      <ClipsCarousel
-        eyebrow={home.clips.eyebrow}
-        viewAll={home.clips.viewAll}
-        items={clips.map((c) => ({
-          brand: c.brand,
-          title: c.title,
-          titleAccent: c.title_accent,
-          accentColor: (c.accent_color as "red" | "yellow" | "green") ?? "red",
-          views: c.views,
-          image: c.image,
-        }))}
-      />
-      <BottomCTA data={home.bottomCta} />
+      {(home.hero as any)?.show !== false && <Hero data={home.hero} />}
+      {(home.stats as any)?.show !== false && <StatsBar stats={home.stats} />}
+      {(home.partners as any)?.show !== false && (
+        <PartnerLogos label={home.partners.label} logos={home.partners.logos} />
+      )}
+      {(home.showreel as any)?.show !== false && <Showreel data={home.showreel} />}
+      {(home.clips as any)?.show !== false && (
+        <ClipsCarousel
+          eyebrow={home.clips.eyebrow}
+          viewAll={home.clips.viewAll}
+          items={clips.map((c) => ({
+            brand: c.brand,
+            title: c.title,
+            titleAccent: c.title_accent,
+            accentColor: (c.accent_color as "red" | "yellow" | "green") ?? "red",
+            views: c.views,
+            image: c.image,
+            showDetails: (c as any).show_details,
+          }))}
+        />
+      )}
+      {(home.bottomCta as any)?.show !== false && <BottomCTA data={home.bottomCta} />}
     </>
   );
 }

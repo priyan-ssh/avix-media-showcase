@@ -98,7 +98,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Long-form content turned into engaging videos that people actually watch.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "https://aviixmedia.com/logo.png" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://aviixmedia.com/logo.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -118,10 +120,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "name": "Aviix Media",
+    "url": "https://aviixmedia.com",
+    "logo": "https://aviixmedia.com/logo.png",
+    "image": "https://aviixmedia.com/logo.png",
+    "description":
+      "Aviix Media is a video editing & content creation agency helping creators and brands turn long-form content into engaging videos.",
+  };
+
   return (
     <html lang="en" className="dark">
       <head>
         <HeadContent />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
       <body className="bg-background text-foreground">
         {children}

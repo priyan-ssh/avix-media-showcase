@@ -7,6 +7,7 @@ import { Container, Eyebrow } from "./primitives";
 import { CtaLink } from "./Cta";
 import { MediaPlaceholder } from "./MediaPlaceholder";
 import { cn } from "@/lib/utils";
+import { InstagramReelModal } from "./InstagramReelModal";
 
 type Clip = {
   brand: string;
@@ -45,13 +46,14 @@ export function ClipsCarousel({
   items: Clip[];
 }) {
   const displayItems =
-    items.length > 0 && items.length < 8 ? [...items, ...items, ...items, ...items] : items;
+    items.length >= 3 && items.length < 8 ? [...items, ...items, ...items, ...items] : items;
 
   const [emblaRef, embla] = useEmblaCarousel({ align: "start", loop: true, dragFree: true }, [
     WheelGesturesPlugin(),
   ]);
 
   const [, forceUpdate] = useState(0);
+  const [selectedReel, setSelectedReel] = useState<string | null>(null);
 
   useEffect(() => {
     if (!embla) return;
@@ -88,8 +90,14 @@ export function ClipsCarousel({
               {displayItems.map((clip, i) => (
                 <div key={i} className="min-w-0 shrink-0 basis-[80%] sm:basis-[45%] md:basis-[32%] py-2 px-1">
                   <div
+                    onClick={() => {
+                      if (clip.image && clip.image.includes("instagram.com")) {
+                        setSelectedReel(clip.image);
+                      }
+                    }}
                     className={cn(
                       "group relative rounded-[18px] transition-all duration-300 hover:scale-[1.02]",
+                      clip.image && clip.image.includes("instagram.com") && "cursor-pointer",
                       ringClass[clip.accentColor],
                     )}
                   >
@@ -107,54 +115,43 @@ export function ClipsCarousel({
                         src={clip.image}
                         alt={clip.title}
                         aspect="9/16"
-                        className="rounded-none border-0"
+                        className="rounded-none border-0 pointer-events-none"
                       />
+                      {/* Transparent Overlay so mouse wheel scrolling & drag gestures work smoothly anywhere over the reel */}
+                      <div className="absolute inset-0 z-10 cursor-pointer" />
+                    </div>
+                  </div>
 
-                      {/* Top dark gradient overlay for crisp podcast/brand text */}
-                      <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-none" />
-                      {/* Bottom deep dark gradient overlay for title and views like in Site 2.png */}
-                      <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-black via-black/85 to-transparent pointer-events-none" />
-
-                      <div className="absolute inset-0 flex flex-col justify-between p-6 z-10 pointer-events-none">
-                        <div className="text-center sm:text-left">
-                          <span className="text-[11px] font-black uppercase tracking-widest text-white/95 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                            {clip.brand}
-                          </span>
+                  {/* Metadata section placed BELOW the reel card (hideable via clip.showDetails) */}
+                  {clip.showDetails !== false && (clip.brand || clip.title || clip.views) ? (
+                    <div className="mt-3.5 flex flex-col gap-1 px-1">
+                      {clip.brand && (
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                          {clip.brand}
+                        </span>
+                      )}
+                      {(clip.title || clip.titleAccent) && (
+                        <div className="text-base font-black uppercase leading-tight text-white">
+                          {clip.title} {clip.titleAccent && <span className={accentClass[clip.accentColor]}>{clip.titleAccent}</span>}
                         </div>
-
-                      <div className="flex flex-col gap-3 text-center sm:text-left">
-                        <div>
-                          <div className="text-2xl font-black uppercase leading-tight text-white drop-shadow">
-                            {clip.title}
-                          </div>
-                          <div
-                            className={cn(
-                              "text-2xl font-black uppercase leading-tight drop-shadow",
-                              accentClass[clip.accentColor],
-                            )}
-                          >
-                            {clip.titleAccent}
-                          </div>
-                        </div>
-
-                        {/* View count and play button placed inside card at bottom left */}
-                        <div className="mt-1 flex items-center justify-center sm:justify-start gap-2.5 text-xs font-bold uppercase tracking-widest text-white/90">
+                      )}
+                      {clip.views && (
+                        <div className="mt-1 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/80">
                           <span
                             className={cn(
-                              "inline-flex h-6 w-6 items-center justify-center rounded-full border bg-black/60 shadow-sm",
+                              "inline-flex h-5 w-5 items-center justify-center rounded-full border bg-black/60 shadow-sm",
                               clip.accentColor === "red" && "border-primary/80 text-primary bg-primary/10",
                               clip.accentColor === "yellow" && "border-yellow-500/80 text-yellow-400 bg-yellow-500/10",
                               clip.accentColor === "green" && "border-green-500/80 text-green-400 bg-green-500/10",
                             )}
                           >
-                            <Play className="h-2.5 w-2.5 fill-current" />
+                            <Play className="h-2 w-2 fill-current" />
                           </span>
                           <span>{clip.views}</span>
                         </div>
-                      </div>
+                      )}
                     </div>
-                    </div>
-                  </div>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -178,6 +175,11 @@ export function ClipsCarousel({
           </button>
         </div>
       </Container>
+      <InstagramReelModal
+        isOpen={!!selectedReel}
+        onClose={() => setSelectedReel(null)}
+        reelUrl={selectedReel}
+      />
     </section>
   );
 }

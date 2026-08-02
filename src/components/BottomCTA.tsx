@@ -28,10 +28,16 @@ export function BottomCTA({
         <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">
           {data.eyebrow}
         </p>
-        <AccentTitle
-          parts={data.titleParts}
-          className="mx-auto mt-6 max-w-3xl text-4xl md:text-5xl lg:text-6xl drop-shadow-md"
-        />
+        {data.title ? (
+          <h2 className="mx-auto mt-6 max-w-3xl text-4xl font-black uppercase tracking-tight text-white drop-shadow-md md:text-5xl lg:text-6xl">
+            {data.title}
+          </h2>
+        ) : (
+          <AccentTitle
+            parts={data.titleParts}
+            className="mx-auto mt-6 max-w-3xl text-4xl md:text-5xl lg:text-6xl drop-shadow-md"
+          />
+        )}
         <p className="mx-auto mt-5 max-w-md text-sm text-muted-foreground leading-relaxed">{data.subtext}</p>
         <div className="mt-8 flex justify-center">
           <CtaLink to={data.cta.to} size="lg" variant="red">
