@@ -53,69 +53,120 @@ export const Route = createFileRoute("/admin")({
 });
 
 type Session = Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"];
+type AuthStatus = "loading" | "unauthenticated" | "not_admin" | "admin";
 
 function AdminPage() {
+  const [mounted, setMounted] = useState(false);
+  const [authStatus, setAuthStatus] = useState<AuthStatus>("loading");
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // 1. Mount check prevents React #418 hydration mismatch during SSR
   useEffect(() => {
-    const sub = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
+    setMounted(true);
+  }, []);
+
+  // 2. Single unified auth & role verification flow
+  useEffect(() => {
+    if (!mounted) return;
+
+    let isSubscribed = true;
+
+    const verifyAuth = async (currSession: Session | null) => {
+      if (!isSubscribed) return;
+      setSession(currSession);
+
+      if (!currSession) {
+        setAuthStatus("unauthenticated");
+        return;
+      }
+
+      setAuthStatus("loading");
+
+      try {
+        // Query user_roles table for admin status
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", currSession.user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+
+        if (roleData && roleData.role === "admin") {
+          if (isSubscribed) setAuthStatus("admin");
+          return;
+        }
+
+        // Query admin count
+        const { count } = await supabase
+          .from("user_roles")
+          .select("id", { count: "exact", head: true })
+          .eq("role", "admin");
+
+        if (isSubscribed) {
+          const adminCount = count ?? 0;
+          setHasAdmin(adminCount > 0);
+
+          if (adminCount === 0) {
+            setAuthStatus("not_admin"); // No admin exists yet
+          } else {
+            setAuthStatus("not_admin"); // Admin exists but user is not it
+          }
+        }
+      } catch (err) {
+        console.error("Error verifying admin credentials:", err);
+        if (isSubscribed) setAuthStatus("unauthenticated");
+      }
+    };
+
+    const sub = supabase.auth.onAuthStateChange((_event, s) => {
+      verifyAuth(s);
     });
 
-    supabase
-      .from("user_roles")
-      .select("id", { count: "exact", head: true })
-      .eq("role", "admin")
-      .then(({ count }) => {
-        setHasAdmin((count ?? 0) > 0);
-      });
+    supabase.auth.getSession().then(({ data }) => {
+      verifyAuth(data.session);
+    });
 
-    return () => sub.data.subscription.unsubscribe();
-  }, [refreshKey]);
+    return () => {
+      isSubscribed = false;
+      sub.data.subscription.unsubscribe();
+    };
+  }, [mounted, refreshKey]);
 
-  useEffect(() => {
-    if (!session) {
-      setIsAdmin(false);
-      return;
-    }
-    (async () => {
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      setIsAdmin(Boolean(data));
-    })();
-  }, [session, refreshKey]);
-
-  if (loading)
+  if (!mounted || authStatus === "loading") {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="flex min-h-[70vh] items-center justify-center bg-background">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
+  }
 
-  if (!session) return <AuthPanel hasAdmin={hasAdmin} />;
-  if (!isAdmin)
+  if (authStatus === "unauthenticated" || !session) {
+    return <AuthPanel hasAdmin={hasAdmin} onAuthSuccess={() => setRefreshKey((k) => k + 1)} />;
+  }
+
+  if (authStatus === "not_admin") {
     return (
       <ClaimAdminPanel
         onClaimed={() => setRefreshKey((k) => k + 1)}
         email={session.user.email ?? ""}
       />
     );
+  }
+
   return <Dashboard email={session.user.email ?? ""} />;
 }
 
 /* ─── Auth ─────────────────────────────────────────────── */
 
-function AuthPanel({ hasAdmin }: { hasAdmin: boolean | null }) {
+function AuthPanel({
+  hasAdmin,
+  onAuthSuccess,
+}: {
+  hasAdmin: boolean | null;
+  onAuthSuccess?: () => void;
+}) {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -135,8 +186,12 @@ function AuthPanel({ hasAdmin }: { hasAdmin: boolean | null }) {
       });
       setMsg(error ? error.message : "Check your email to confirm, then sign in.");
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setMsg(error.message);
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setMsg(error.message);
+      } else if (data.session) {
+        onAuthSuccess?.();
+      }
     }
     setBusy(false);
   };
