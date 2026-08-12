@@ -42,6 +42,7 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  RefreshCcw,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -696,7 +697,7 @@ function LogsTab() {
   const fetchLogs = async () => {
     setLoading(true);
     // Auto-cleanup logs older than 30 days
-    await supabase.rpc('cleanup_site_errors').catch(() => {});
+    await supabase.rpc('cleanup_site_errors');
     
     const { data } = await supabase
       .from("site_errors")

@@ -47,12 +47,15 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
     
     if (typeof window !== "undefined") {
-      supabase.from("site_errors").insert({
-        message: error.message || "Unknown error",
-        stack_trace: error.stack,
-        url: window.location.href,
-        user_agent: navigator.userAgent
-      }).catch(console.error);
+      (async () => {
+        const { error: dbError } = await supabase.from("site_errors").insert({
+          message: error.message || "Unknown error",
+          stack_trace: error.stack,
+          url: window.location.href,
+          user_agent: navigator.userAgent
+        });
+        if (dbError) console.error("Error logging to db:", dbError);
+      })();
     }
   }, [error]);
 
