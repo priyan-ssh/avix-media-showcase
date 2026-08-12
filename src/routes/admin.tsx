@@ -627,6 +627,7 @@ function ContentEditor({ page }: { page: "home" | "about" | "contact" | "site" }
 function LiveSitePreview({ page }: { page: string }) {
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [key, setKey] = useState(0);
+  const [showIframe, setShowIframe] = useState(false);
 
   const routePath = page === "home" ? "/" : page === "site" ? "/" : `/${page}`;
   const reloadPreview = () => setKey((k) => k + 1);
@@ -636,7 +637,7 @@ function LiveSitePreview({ page }: { page: string }) {
       <div className="sticky top-4 flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className={cn("h-2 w-2 rounded-full", showIframe ? "bg-emerald-500 animate-pulse" : "bg-zinc-600")} />
             Live Site Preview
           </p>
           <div className="flex items-center gap-1.5">
@@ -695,7 +696,36 @@ function LiveSitePreview({ page }: { page: string }) {
 
           {/* Iframe Viewport Container */}
           <div className="w-full flex items-center justify-center p-2 bg-[#050505] min-h-[550px] max-h-[78vh] overflow-hidden">
-            {device === "desktop" ? (
+            {!showIframe ? (
+              <div className="flex flex-col items-center justify-center p-8 text-center gap-3 my-auto">
+                <div className="h-10 w-10 rounded-full border border-border bg-card flex items-center justify-center text-primary">
+                  <Eye className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-white">Live Frame Preview Disabled</h3>
+                  <p className="text-[10px] text-muted-foreground mt-1 max-w-xs">
+                    To prevent recursive browser reloads, click below or open in a new tab.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowIframe(true)}
+                    className="rounded bg-primary px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/90 transition shadow"
+                  >
+                    Enable Embedded Frame
+                  </button>
+                  <a
+                    href={routePath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded border border-border bg-card px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-white hover:bg-card/80 transition"
+                  >
+                    Open Live Page ↗
+                  </a>
+                </div>
+              </div>
+            ) : device === "desktop" ? (
               <div className="w-full h-[72vh] overflow-hidden rounded-lg border border-border/40">
                 <iframe
                   key={key}
