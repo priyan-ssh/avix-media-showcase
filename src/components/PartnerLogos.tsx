@@ -16,12 +16,6 @@ export function PartnerLogos({
 
   if (!logos || logos.length === 0) return null;
 
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    if (containerRef.current && (Math.abs(e.deltaX) > 0 || Math.abs(e.deltaY) > 0)) {
-      containerRef.current.scrollLeft += e.deltaY || e.deltaX;
-    }
-  };
-
   const renderTrack = (ariaHidden = false) => (
     <div
       aria-hidden={ariaHidden}
@@ -77,7 +71,6 @@ export function PartnerLogos({
       {/* 100% Gapless Infinite Scrolling & Horizontal Wheel Scrollable Marquee */}
       <div
         ref={containerRef}
-        onWheel={handleWheel}
         className="group/marquee flex relative w-full overflow-x-auto no-scrollbar [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
       >
         {renderTrack(false)}
