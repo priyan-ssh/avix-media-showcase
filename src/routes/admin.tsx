@@ -1346,12 +1346,19 @@ function MediaUploadField({
             <ImageIcon className="h-3 w-3" /> View
           </a>
         )}
-        {/* Also allow pasting a URL directly */}
         <input
           type="url"
           value={currentUrl}
           placeholder="…or paste image/video URL / Instagram Reel link"
-          onChange={(e) => onUploaded(e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (val.startsWith("file://") || val.startsWith("C:\\") || val.startsWith("D:\\")) {
+              alert("Local files cannot be saved. Please click 'Upload Device File' instead.");
+              onUploaded(""); // Clear invalid value
+              return;
+            }
+            onUploaded(val);
+          }}
           className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-2 text-[11px] text-white placeholder:text-muted-foreground focus:border-primary focus:outline-none"
         />
       </div>
