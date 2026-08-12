@@ -625,53 +625,11 @@ function ContentEditor({ page }: { page: "home" | "about" | "contact" | "site" }
 
 /* ─── Live Site Visual Preview Component ──────────────────── */
 function LiveSitePreview({ page }: { page: string }) {
-  const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
-  const [key, setKey] = useState(0);
-  const [showIframe, setShowIframe] = useState(false);
-
   const routePath = page === "home" ? "/" : page === "site" ? "/" : `/${page}`;
-  const reloadPreview = () => setKey((k) => k + 1);
 
   return (
     <div className="hidden xl:block">
       <div className="sticky top-4 flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-            <span className={cn("h-2 w-2 rounded-full", showIframe ? "bg-emerald-500 animate-pulse" : "bg-zinc-600")} />
-            Live Site Preview
-          </p>
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => setDevice("desktop")}
-              className={cn(
-                "rounded px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition",
-                device === "desktop" ? "bg-primary text-white shadow" : "bg-card text-muted-foreground hover:text-white"
-              )}
-            >
-              Desktop
-            </button>
-            <button
-              type="button"
-              onClick={() => setDevice("mobile")}
-              className={cn(
-                "rounded px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition",
-                device === "mobile" ? "bg-primary text-white shadow" : "bg-card text-muted-foreground hover:text-white"
-              )}
-            >
-              Mobile
-            </button>
-            <a
-              href={routePath}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded bg-card px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-white transition"
-            >
-              Open Tab ↗
-            </a>
-          </div>
-        </div>
-
         {/* Browser Mockup Window Container */}
         <div className="relative overflow-hidden rounded-xl border border-border bg-[#0a0a0a] shadow-2xl flex flex-col items-center">
           {/* Top Browser Address Bar */}
@@ -684,66 +642,27 @@ function LiveSitePreview({ page }: { page: string }) {
             <div className="flex items-center gap-1.5 rounded bg-black/60 px-3 py-0.5 text-[9px] font-mono text-muted-foreground">
               <span>https://aviixmedia.com{routePath === "/" ? "" : routePath}</span>
             </div>
-            <button
-              type="button"
-              onClick={reloadPreview}
-              title="Refresh Preview"
-              className="text-muted-foreground hover:text-white text-[10px] font-bold uppercase tracking-wider"
-            >
-              ↻ Refresh
-            </button>
           </div>
 
-          {/* Iframe Viewport Container */}
-          <div className="w-full flex items-center justify-center p-2 bg-[#050505] min-h-[550px] max-h-[78vh] overflow-hidden">
-            {!showIframe ? (
-              <div className="flex flex-col items-center justify-center p-8 text-center gap-3 my-auto">
-                <div className="h-10 w-10 rounded-full border border-border bg-card flex items-center justify-center text-primary">
-                  <Eye className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-white">Live Frame Preview Disabled</h3>
-                  <p className="text-[10px] text-muted-foreground mt-1 max-w-xs">
-                    To prevent recursive browser reloads, click below or open in a new tab.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 mt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowIframe(true)}
-                    className="rounded bg-primary px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/90 transition shadow"
-                  >
-                    Enable Embedded Frame
-                  </button>
-                  <a
-                    href={routePath}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded border border-border bg-card px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-white hover:bg-card/80 transition"
-                  >
-                    Open Live Page ↗
-                  </a>
-                </div>
-              </div>
-            ) : device === "desktop" ? (
-              <div className="w-full h-[72vh] overflow-hidden rounded-lg border border-border/40">
-                <iframe
-                  key={key}
-                  src={routePath}
-                  title="Live Site Preview"
-                  className="w-full h-full border-0 bg-background"
-                />
-              </div>
-            ) : (
-              <div className="w-[375px] h-[660px] overflow-hidden rounded-[32px] border-[6px] border-zinc-800 shadow-2xl my-2">
-                <iframe
-                  key={key}
-                  src={routePath}
-                  title="Mobile Site Preview"
-                  className="w-full h-full border-0 bg-background"
-                />
-              </div>
-            )}
+          {/* Clean Preview CTA */}
+          <div className="w-full flex flex-col items-center justify-center p-10 bg-[#050505] min-h-[300px] gap-4">
+            <div className="h-12 w-12 rounded-full border border-border bg-card flex items-center justify-center text-primary">
+              <Eye className="h-6 w-6" />
+            </div>
+            <div className="text-center">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-white">Live Page Preview</h3>
+              <p className="text-[11px] text-muted-foreground mt-1.5 max-w-xs leading-relaxed">
+                Opens your live site in a new browser tab for a clean, full-resolution preview.
+              </p>
+            </div>
+            <a
+              href={routePath}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-xs font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/90 transition shadow-lg"
+            >
+              Open Live Page ↗
+            </a>
           </div>
         </div>
       </div>
