@@ -25,8 +25,18 @@ import { ClipsCarousel } from "@/components/ClipsCarousel";
 import { BottomCTA } from "@/components/BottomCTA";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useClips } from "@/hooks/useContent";
+import siteJson from "@/content/site.json";
+import homeJson from "@/content/home.json";
+import aboutJson from "@/content/about.json";
+import contactJson from "@/content/contact.json";
 import { cn } from "@/lib/utils";
+
+const pageFallbacks: Record<string, any> = {
+  site: siteJson,
+  home: homeJson,
+  about: aboutJson,
+  contact: contactJson,
+};
 import {
   LogOut,
   Loader2,
@@ -541,8 +551,8 @@ function ContentEditor({ page }: { page: "home" | "about" | "contact" | "site" }
       .eq("page", page)
       .maybeSingle();
     // Deep merge template fallback JSON with DB data so all new logo and show fields exist
-    const fallbackMod = await import(`@/content/${page}.json`);
-    setData(deepMerge(fallbackMod.default, row?.data ?? {}));
+    const fallbackData = pageFallbacks[page] ?? {};
+    setData(deepMerge(fallbackData, row?.data ?? {}));
     setLoading(false);
   }, [page]);
 
@@ -1096,7 +1106,7 @@ function SortableClipRow({
   const [fetchingIg, setFetchingIg] = useState(false);
 
   const fetchIgDetails = async () => {
-    if (!clip.image.includes("instagram.com")) return;
+    if (!clip.image || !clip.image.includes("instagram.com")) return;
     setFetchingIg(true);
     const match = clip.image.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/i);
     try {
