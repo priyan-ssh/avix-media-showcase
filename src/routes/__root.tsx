@@ -15,6 +15,8 @@ import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { contentQueryOptions, clipsQueryOptions } from "../hooks/useContent";
 
+import { supabase } from "../integrations/supabase/client";
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -40,8 +42,18 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+  
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    
+    if (typeof window !== "undefined") {
+      supabase.from("site_errors").insert({
+        message: error.message || "Unknown error",
+        stack_trace: error.stack,
+        url: window.location.href,
+        user_agent: navigator.userAgent
+      }).catch(console.error);
+    }
   }, [error]);
 
   return (
@@ -134,7 +146,7 @@ function RootShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script
@@ -142,7 +154,7 @@ function RootShell({ children }: { children: ReactNode }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="bg-background text-foreground">
+      <body className="bg-background text-foreground" suppressHydrationWarning>
         {children}
         <Scripts />
       </body>

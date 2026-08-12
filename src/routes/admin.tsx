@@ -306,19 +306,20 @@ function ClaimAdminPanel({ onClaimed, email }: { onClaimed: () => void; email: s
 
 /* ─── Dashboard Shell ───────────────────────────────────── */
 
-type Tab = "overview" | "home" | "about" | "contact" | "site" | "clips" | "messages";
+type Tab = "overview" | "home" | "about" | "contact" | "site" | "clips" | "messages" | "logs";
 
 function Dashboard({ email }: { email: string }) {
   const [tab, setTab] = useState<Tab>("overview");
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "overview", label: "Overview" },
-    { id: "home", label: "Home" },
-    { id: "about", label: "About" },
-    { id: "contact", label: "Contact" },
-    { id: "site", label: "Header & Footer" },
-    { id: "clips", label: "Clips" },
+    { id: "home", label: "Home Page" },
+    { id: "about", label: "About Page" },
+    { id: "contact", label: "Contact Page" },
+    { id: "clips", label: "Video Clips" },
     { id: "messages", label: "Messages" },
+    { id: "site", label: "Global/Site" },
+    { id: "logs", label: "System Logs" },
   ];
 
   return (
@@ -363,6 +364,7 @@ function Dashboard({ email }: { email: string }) {
         {tab === "site" && <ContentEditor page="site" />}
         {tab === "clips" && <ClipsManager />}
         {tab === "messages" && <MessagesTab />}
+        {tab === "logs" && <LogsTab />}
       </div>
     </Container>
   );
@@ -687,7 +689,82 @@ function LiveSitePreview({ page }: { page: string }) {
   );
 }
 
-/* ─── Dynamic Form Renderer ─────────────────────────────── */
+function LogsTab() {
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchLogs = async () => {
+    setLoading(true);
+    // Auto-cleanup logs older than 30 days
+    await supabase.rpc('cleanup_site_errors').catch(() => {});
+    
+    const { data } = await supabase
+      .from("site_errors")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    setLogs(data || []);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold uppercase tracking-widest text-white">System Logs</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Recent crashes and hydration errors. Auto-cleaned after 30 days.
+          </p>
+        </div>
+        <button
+          onClick={fetchLogs}
+          className="inline-flex items-center gap-2 rounded-md bg-secondary px-3 py-2 text-xs font-semibold uppercase tracking-widest text-secondary-foreground hover:bg-secondary/80"
+        >
+          <RefreshCcw className={cn("h-3 w-3", loading && "animate-spin")} />
+          Refresh
+        </button>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        {loading ? (
+          <div className="p-8 text-center text-xs text-muted-foreground">Loading logs...</div>
+        ) : logs.length === 0 ? (
+          <div className="p-8 text-center text-xs text-muted-foreground">No recent errors found.</div>
+        ) : (
+          <div className="divide-y divide-border">
+            {logs.map((log) => (
+              <div key={log.id} className="p-4 text-xs">
+                <div className="flex items-start justify-between gap-4 mb-2">
+                  <div className="font-mono text-red-400 break-all">{log.message}</div>
+                  <div className="whitespace-nowrap text-muted-foreground">
+                    {new Date(log.created_at).toLocaleString()}
+                  </div>
+                </div>
+                {log.url && (
+                  <div className="text-muted-foreground mb-1"><span className="text-primary/70 font-semibold uppercase text-[10px] tracking-wider">URL:</span> {log.url}</div>
+                )}
+                {log.user_agent && (
+                  <div className="text-muted-foreground mb-2"><span className="text-primary/70 font-semibold uppercase text-[10px] tracking-wider">Agent:</span> {log.user_agent}</div>
+                )}
+                {log.stack_trace && (
+                  <pre className="mt-2 p-3 bg-background rounded border border-border/50 text-[10px] text-muted-foreground overflow-x-auto">
+                    {log.stack_trace}
+                  </pre>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Shared Components ────────────────────────────── */
 // Recursively renders fields for any JSON shape
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -1227,6 +1304,7 @@ function MediaUploadField({
   };
 
   const isVideo = currentUrl && /\.(mp4|webm|mov|m4v|ogg|qt|mkv|avi)(\?|#|$)/i.test(currentUrl);
+  const isValidUrl = currentUrl && (currentUrl.startsWith("http") || currentUrl.startsWith("data:") || currentUrl.startsWith("/"));
 
   return (
     <div className="flex flex-col gap-1">
@@ -1257,7 +1335,7 @@ function MediaUploadField({
           )}
           {uploading ? "Uploading…" : "Upload Device File"}
         </button>
-        {currentUrl && (
+        {isValidUrl && (
           <a
             href={currentUrl}
             target="_blank"
@@ -1277,7 +1355,10 @@ function MediaUploadField({
         />
       </div>
       {error && <p className="text-[10px] text-red-400">{error}</p>}
-      {currentUrl && isVideo && (
+      {currentUrl && currentUrl.startsWith("file://") && (
+        <p className="text-[10px] text-yellow-500 mt-1">Local file paths are not supported. Please click "Upload Device File".</p>
+      )}
+      {isValidUrl && isVideo && (
         <video
           src={currentUrl}
           className="mt-2 h-20 w-36 rounded border border-border bg-black object-cover"
@@ -1287,7 +1368,7 @@ function MediaUploadField({
           autoPlay
         />
       )}
-      {currentUrl && !isVideo && (
+      {isValidUrl && !isVideo && (
         <img
           src={currentUrl}
           alt="Preview"
