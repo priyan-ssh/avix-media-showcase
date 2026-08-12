@@ -320,7 +320,25 @@ function ClaimAdminPanel({ onClaimed, email }: { onClaimed: () => void; email: s
 type Tab = "overview" | "home" | "about" | "contact" | "site" | "clips" | "messages" | "logs";
 
 function Dashboard({ email }: { email: string }) {
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTabState] = useState<Tab>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("admin_active_tab") as Tab;
+      if (
+        saved &&
+        ["overview", "home", "about", "contact", "site", "clips", "messages", "logs"].includes(saved)
+      ) {
+        return saved;
+      }
+    }
+    return "overview";
+  });
+
+  const setTab = (t: Tab) => {
+    setTabState(t);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("admin_active_tab", t);
+    }
+  };
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "overview", label: "Overview" },
@@ -343,6 +361,7 @@ function Dashboard({ email }: { email: string }) {
           <p className="text-xs text-muted-foreground">Signed in as {email}</p>
         </div>
         <button
+          type="button"
           onClick={() => supabase.auth.signOut()}
           className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-card"
         >
@@ -353,6 +372,7 @@ function Dashboard({ email }: { email: string }) {
       <div className="mt-6 flex flex-wrap gap-2">
         {tabs.map((t) => (
           <button
+            type="button"
             key={t.id}
             onClick={() => setTab(t.id)}
             className={cn(
@@ -579,6 +599,7 @@ function ContentEditor({ page }: { page: "home" | "about" | "contact" | "site" }
             Edit: {page === "site" ? "Header & Footer (Site)" : page}
           </h2>
           <button
+            type="button"
             onClick={save}
             disabled={busy}
             className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-widest text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
@@ -1047,12 +1068,14 @@ function ClipsManager() {
           Drag rows to reorder. Click Save All to persist.
         </p>
         <button
+          type="button"
           onClick={addClip}
           className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-card"
         >
           <Plus className="h-4 w-4" /> Add clip
         </button>
         <button
+          type="button"
           onClick={saveAll}
           disabled={saving}
           className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-xs font-semibold uppercase tracking-widest text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
@@ -1219,7 +1242,7 @@ function SortableClipRow({
           </div>
         </div>
 
-        <button onClick={onDelete} className="mt-1 text-muted-foreground hover:text-primary">
+        <button type="button" onClick={onDelete} className="mt-1 text-muted-foreground hover:text-primary">
           <Trash2 className="h-4 w-4" />
         </button>
       </div>
